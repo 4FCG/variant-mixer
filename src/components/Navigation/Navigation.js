@@ -9,8 +9,8 @@ export class Navigation extends React.Component {
         <Navbar>
             <Horizontal>
                 <Logo />
-                <Link to="/" primary>Select Package</Link>
-                <Button primary>Import Package</Button>
+                <Link to="/">Select Package</Link>
+                <Button>Import Package</Button>
             </Horizontal>
             <QueueBar count={1} />
         </Navbar>

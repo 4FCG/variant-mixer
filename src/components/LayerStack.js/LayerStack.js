@@ -7,9 +7,11 @@ class LayerStack extends React.Component {
         return (
             <ParentBox image={this.props.baseImg} >
                 {this.props.layers.map((layer) => (
-                    layer.map((image, index) => 
-                        <Layer image={image} key={index} />
-                    )
+                    layer.map((image, index) => {
+                        if (image.active) {
+                            return (<Layer image={image.previewPath} key={index} />);
+                        }
+                    })
                 ))}
             </ParentBox>
         );
