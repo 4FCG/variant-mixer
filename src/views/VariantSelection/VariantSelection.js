@@ -3,19 +3,6 @@ import { PageWrapper, Button, BoxWrapper, LayerStack } from '../../components';
 import { Horizontal, ImageContainer, ButtonGroup, SelectionContainer } from './VariantSelection.styles';
 import PropTypes from 'prop-types';
 
-//import sampleImage from '../../assets/sample.gif';
-//import baseImage from '../../assets/Base.png';
-//import knife from '../../assets/Knife.png';
-//import hat from '../../assets/Hat.png';
-//import face from '../../assets/Face.png';
-
-//const sample = [{img: sampleImage}, {img: sampleImage}, {img: sampleImage}, {img: sampleImage}];
-
-//const sampleLayers = [
-//    [knife, face],
-//    [hat]
-//];
-
 class VariantSelection extends React.Component {
     constructor(props) {
         super(props);
@@ -24,6 +11,7 @@ class VariantSelection extends React.Component {
           boxes: []
         };
         this.handleClick = this.handleClick.bind(this);
+        this.handleExport = this.handleExport.bind(this);
       }
 
     componentDidMount() {
@@ -64,6 +52,16 @@ class VariantSelection extends React.Component {
         });
     }
 
+    async handleExport() {
+        let layers = [].concat(...this.state.package.layers).reduce(function(filtered, layer) {
+            if (layer.active) {
+                filtered.push(layer.path);
+            }
+            return filtered;
+        }, []);
+        await window.mainApi.exportImage({base: this.state.package.path, layers: layers});
+    }
+
     get layers() {
         if (this.state.package) {
             return this.state.package.layers
@@ -85,7 +83,7 @@ class VariantSelection extends React.Component {
                     <ImageContainer>
                         <LayerStack layers={this.layers} baseImg={this.baseImage} />
                         <ButtonGroup>
-                            <Button primary >Export Image</Button>
+                            <Button primary onClick={this.handleExport}>Export Image</Button>
                             <Button primary >Add to queue</Button>
                         </ButtonGroup>
                     </ImageContainer>

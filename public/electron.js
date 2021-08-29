@@ -1,8 +1,9 @@
 const path = require('path');
 const fs = require("fs");
 const { readdir, lstat, access } = require('fs/promises');
+const sharp = require('sharp');
 
-const { app, BrowserWindow, ipcMain, protocol } = require('electron');
+const { app, BrowserWindow, ipcMain, protocol, dialog } = require('electron');
 const isDev = require('electron-is-dev');
 
 function setup() {
@@ -46,7 +47,6 @@ function createWindow() {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   protocol.registerFileProtocol('image', (request, callback) => {
-    console.log(request.url)
     const url = request.url.substr(7)
     callback({ path: url })
   })
@@ -140,4 +140,69 @@ async function loadImages(layerPath) {
       console.error(err);
   }
   return images;
+}
+
+ipcMain.handle("exportImage", async (event, args) => {
+  let result = null;
+  try {
+    result = await dialog.showSaveDialog({
+      title: 'Export image',
+      defaultPath: 'Variant',
+      buttonLabel: 'Export',
+      filters: [
+        {
+          name: "JPEG",
+          extensions: ['jpeg', 'jpg']
+        },
+        {
+          name: "PNG",
+          extensions: ['png']
+        },
+        {
+          name: "WebP",
+          extensions: ['webp']
+        }
+      ]
+    });
+  } catch(err) {
+    console.error(err);
+    return false;
+  }
+
+  if (result.canceled) {
+    return false;
+  }
+
+  try {
+    await generateComposite(args.base, args.layers, result.filePath.split('.').slice(0, -1).join('.'), result.filePath.split('.').pop());
+    return true;
+  } catch (err) {
+    console.error(err);
+  }
+  return false;
+});
+
+async function generateComposite(base, layers, savePath, filetype) {
+    console.log(base, layers);
+    const data = await Promise.all(layers.map(layer => sharp(layer).toBuffer()));
+    const files = data.map(buffer => ({input: buffer}));
+    let composite = sharp(base);
+    if (layers.length > 0) {
+      composite.composite(files);
+    }
+    if (filetype == 'png') {
+      composite.png();
+    } else if (filetype == 'webp') {
+      composite.webp({ quality: 100 })
+    }
+    else {
+      filetype = 'jpeg'
+      composite.jpeg({
+        quality: 100,
+        mozjpeg: true
+      });
+    }
+    composite.toFile(`${savePath}.${filetype}`);
+    await composite;
+    console.log(`${savePath}.${filetype}`);
 }

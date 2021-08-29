@@ -2,6 +2,7 @@ import { css } from 'styled-components';
 
 export const ButtonStyles = css`
     font: 400 13.3333px Arial;
+    cursor: pointer;
     text-decoration: none;
     text-align: center;
     display: inline-block;
