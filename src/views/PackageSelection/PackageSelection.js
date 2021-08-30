@@ -1,24 +1,45 @@
 import React from 'react';
 import { Redirect } from "react-router-dom";
-import { BoxWrapper, PageWrapper } from '../../components';
+import { BoxWrapper, PageWrapper, ErrorBox } from '../../components';
+import plus from '../../assets/plus.webp';
 
 export class PackageSelection extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       'packages': [],
-      'redirect': null
+      'redirect': null,
+      'error': null
     };
     this.handleClick = this.handleClick.bind(this);
   }
 
   handleClick(e) {
-    this.setState({
-      "redirect": {
-        pathname: "/variant",
-        state: { packagePath: this.state.packages[e.currentTarget.dataset.index].path}
+    if (e.currentTarget.dataset.index < this.state.packages.length) {
+      this.setState({
+        "redirect": {
+          pathname: "/variant",
+          state: { packagePath: this.state.packages[e.currentTarget.dataset.index].path}
+        }
+      });
+    } else if (e.currentTarget.dataset.index == this.state.packages.length) {
+      this.importPackage();
+    }
+  }
+
+  async importPackage() {
+    try {
+      let result = await window.mainApi.importPackage();
+      if (result.canceled && result.error) {
+        this.setState({
+          "error": {type: result.error.type, message: result.error.message}
+        });
+      } else if (!result.canceled) {
+        this.getPackages();
       }
-    });
+    } catch(err) {
+      console.log(err);
+    }
   }
 
   async getPackages() {
@@ -33,11 +54,13 @@ export class PackageSelection extends React.Component {
   }
 
   get packages() {
-    return this.state.packages.map(pack => {
+    let packages = this.state.packages.map(pack => {
       return {
         img: pack.img
       }
     });
+    packages.push({img: plus});
+    return packages;
   }
 
   render() {
@@ -46,6 +69,11 @@ export class PackageSelection extends React.Component {
       }
       return (
         <PageWrapper>
+          {this.state.error &&
+           <ErrorBox type={this.state.error.type}>
+             {this.state.error.message}
+           </ErrorBox> 
+          }
           <BoxWrapper boxes={this.packages} clickHandle={this.handleClick} />
         </PageWrapper>
       );
