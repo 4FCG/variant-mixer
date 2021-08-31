@@ -9,7 +9,7 @@ class LayerStack extends React.Component {
                 {this.props.layers.map((layer) => (
                     layer.map((image, index) => {
                         if (image.active) {
-                            return (<Layer image={image.previewPath} key={index} />);
+                            return (<Layer image={image.overlayPath} key={index} />);
                         }
                     })
                 ))}

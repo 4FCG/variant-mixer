@@ -74,27 +74,47 @@ ipcMain.handle("listPackages", async () => {
   let packages = [];
     let packageFolder = path.join(app.getPath('userData'), '/Packages');
     try {
-    let files = await readdir(packageFolder);
-    for (let file of files) {
-        let packagePath = path.join(packageFolder, file)
-        if ((await lstat(packagePath)).isDirectory()) {
-            let imagePath = path.join(packagePath, 'Base.png');
-            try {
-                await access(imagePath);
+      let files = await readdir(packageFolder);
+      for (let file of files) {
+          let packagePath = path.join(packageFolder, file)
+          if ((await lstat(packagePath)).isDirectory()) {
+              try {
+                let imagePath = await getBaseImage(packagePath);
                 packages.push({
                     path: packagePath,
                     img: 'image://' + imagePath.split(path.sep).join(path.posix.sep)
                 });
-            } catch {
-                console.error(`Base image not found in ${packagePath}`);
-            }
-        }
-    }
+              } catch {
+                  console.error(`Base image not found in ${packagePath}`);
+              }
+          }
+      }
     } catch (err) {
         console.error(err);
     }
     return packages;
 });
+
+const allowedExtensions = ['.png', '.jpg', '.jpeg', '.webp'];
+
+async function getBaseImage(directory) {
+  try {
+    let files = await readdir(directory);
+    for (let file of files) {
+        let imagePath = path.join(directory, file);
+        let extension = path.extname(file);
+        if ((await lstat(imagePath)).isFile() && path.basename(file, extension) == 'Base') {
+            if (allowedExtensions.includes(extension)) {
+              return imagePath;
+            }
+        }
+    }
+  } catch (err) {
+      console.error(err);
+  }
+
+  throw `No base image found in ${directory}`;
+}
 
 ipcMain.handle("loadPackage", async (event, args) => {
   let layers = [];
@@ -109,11 +129,11 @@ ipcMain.handle("loadPackage", async (event, args) => {
   } catch {
       throw 'Path does not lead to folder.';
   }
-  let imagePath = path.join(args, 'Base.png');
+  let imagePath = null;
   try {
-      await access(imagePath);
+      imagePath = await getBaseImage(args);
   } catch {
-    throw 'No Base.png found in package folder';
+    throw `No Base image found in ${args}`;
   }
 
   return {
@@ -130,17 +150,35 @@ async function loadImages(layerPath) {
       for (let file of files) {
           let imagePath = path.join(layerPath, file);
           if ((await lstat(imagePath)).isFile()) {
+            let name = path.basename(file, path.extname(file));
+            if (!name.endsWith('_thumbnail')) {
+              let thumbnail = path.join(path.dirname(imagePath), `${name}_thumbnail.png`);
+              // check if the thumbnail exists
+              try {
+                await access(thumbnail);
+              } catch {
+                // create missing thumbnail
+                await createThumbnail(imagePath);
+              }
               images.push({
-                  path: imagePath,
-                  previewPath: 'image://' + imagePath.split(path.sep).join(path.posix.sep),
-                  name: file.split('.')[0]
+                path: imagePath,
+                previewPath: 'image://' + thumbnail.split(path.sep).join(path.posix.sep),
+                overlayPath: 'image://' + imagePath.split(path.sep).join(path.posix.sep),
+                name: name
               });
+            }
           }
       }
   } catch (err) {
       console.error(err);
   }
   return images;
+}
+
+async function createThumbnail(imagePath) {
+  return await sharp(imagePath)
+    .trim()
+    .toFile(path.join(path.dirname(imagePath), `${path.basename(imagePath, path.extname(imagePath))}_thumbnail.png`));
 }
 
 ipcMain.handle("exportImage", async (event, args) => {
@@ -245,7 +283,7 @@ ipcMain.handle("importPackage", async () => {
     console.error(err);
     return {canceled: true, error: {type: 'error', message: 'Something went wrong during file processing.'}};
   }
-  // check if Base.png exists
+  // check if Base image exists
   if (!files.some(file => file.path.includes('Base.'))) {
     // remove bad package from folder
     try {

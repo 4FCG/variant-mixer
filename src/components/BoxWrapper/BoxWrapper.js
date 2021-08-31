@@ -24,12 +24,25 @@ const Wrapper = styled.div`
     margin-left: -20px;
 `;
 
+const NameTag = styled.div`
+    width: 100%;
+    background-color: rgba(11, 12, 16, 0.3);
+    color: ${props => props.theme.light};
+    margin-top: 70%;
+    text-align: center;
+    overflow: hidden;
+`;
+
 class BoxWrapper extends React.Component {
     render() {
         return (
             <Wrapper>
                 {this.props.boxes.map((box, index) =>
-                    <ImageBox key={index} data-index={index} image={box.img} onClick={this.props.clickHandle} />
+                    <ImageBox key={index} data-index={index} image={box.img} onClick={this.props.clickHandle}>
+                        {box.name && 
+                            <NameTag>{box.name}</NameTag>
+                        }
+                    </ImageBox>
                 )}
             </Wrapper>
         );
