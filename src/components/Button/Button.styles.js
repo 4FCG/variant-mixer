@@ -12,8 +12,14 @@ export const ButtonStyles = css`
     width: 8rem;
     background: transparent;
     color: ${props => props.theme.light};
-    border: 2px solid ${props => props.theme.primary};
+    border: 2px solid ${props => props.theme.dark};
     ${props => props.secondary && css`
         border: 2px solid ${props => props.theme.dark};
     `}
+    &:active {
+        transform scale(.95);
+    }
+    &:hover {
+        border-color: ${props => props.theme.primary};
+    }
 `

@@ -33,7 +33,8 @@ class VariantSelection extends React.Component {
                     img: image.previewPath,
                     name: image.name,
                     index: index,
-                    layer: layerNum
+                    layer: layerNum,
+                    active: false
                 });
             }
         }
@@ -45,6 +46,7 @@ class VariantSelection extends React.Component {
 
     handleClick(e) {
         let box = this.state.boxes[e.currentTarget.dataset.index];
+        box.active = !box.active;
         let newPackage = this.state.package;
         newPackage.layers[box.layer][box.index].active = !newPackage.layers[box.layer][box.index].active;
         this.setState({

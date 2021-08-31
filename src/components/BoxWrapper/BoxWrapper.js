@@ -1,11 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const ImageBox = styled.div`
     width: 150px;
     height: 150px;
     border: 2px solid ${props => props.theme.dark};
+    box-sizing: border-box;
     background-color: ${props => props.theme.secondary};
     margin-left: 20px;
     margin-top: 20px;
@@ -13,7 +14,16 @@ const ImageBox = styled.div`
     background-image: url(${props => props.image});
     background-size: contain;
     background-repeat: no-repeat;
-    background-position: center; 
+    background-position: center;
+    ${props => props.active && css`
+        border: 4px solid ${props => props.theme.primary};
+    `}
+    &:active {
+        transform scale(.95);
+    }
+    &:hover {
+        border-color: ${props => props.theme.primary};
+    }
 `;
 
 const Wrapper = styled.div`
@@ -38,7 +48,7 @@ class BoxWrapper extends React.Component {
         return (
             <Wrapper>
                 {this.props.boxes.map((box, index) =>
-                    <ImageBox key={index} data-index={index} image={box.img} onClick={this.props.clickHandle}>
+                    <ImageBox key={index} data-index={index} image={box.img} active={box.active} onClick={this.props.clickHandle}>
                         {box.name && 
                             <NameTag>{box.name}</NameTag>
                         }

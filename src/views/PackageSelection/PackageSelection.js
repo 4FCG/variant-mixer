@@ -34,6 +34,12 @@ export class PackageSelection extends React.Component {
         this.setState({
           "error": {type: result.error.type, message: result.error.message}
         });
+        setTimeout(() => {
+          // After 5 remove error message
+          this.setState({
+            "error": null
+          });
+        }, 5000)
       } else if (!result.canceled) {
         this.getPackages();
       }
