@@ -6,6 +6,8 @@ const decompress = require("decompress");
 
 const { app, BrowserWindow, ipcMain, protocol, dialog } = require('electron');
 const isDev = require('electron-is-dev');
+const { url } = require('inspector');
+const { format } = require('url');
 
 function setup() {
   let dataPath = path.join(app.getPath('userData'), '/Packages');
@@ -21,6 +23,7 @@ function createWindow() {
     height: 720,
     minWidth: 600,
     minHeight: 450,
+    icon: path.join(__dirname + './logo_round.ico'),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -35,9 +38,14 @@ function createWindow() {
   win.loadURL(
     isDev
       ? 'http://localhost:3000'
-      : `file://${path.join(__dirname, '../build/index.html')}`
+      : format({
+        pathname: path.join(__dirname,'../build/index.html'),
+        protocol: 'file',
+        slashes: true
+      })
   );
   // Open the DevTools.
+  //win.webContents.openDevTools({ mode: 'detach' });
   if (isDev) {
     win.webContents.openDevTools({ mode: 'detach' });
   }

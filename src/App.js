@@ -1,5 +1,5 @@
 import React from 'react';
-import {BrowserRouter as Router, Route, Switch} from 'react-router-dom'
+import {HashRouter as Router, Route, Switch} from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
 
 import { PackageSelection, VariantSelection } from './views';
@@ -26,6 +26,7 @@ const Page = styled.div`
 `;
 
 function App() {
+  console.log(__dirname);
   return (
     <ThemeProvider theme={theme}>
       <Page>
