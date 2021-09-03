@@ -39,7 +39,7 @@ export class PackageSelection extends React.Component {
           this.setState({
             "error": null
           });
-        }, 5000)
+        }, 5000);
       } else if (!result.canceled) {
         this.getPackages();
       }

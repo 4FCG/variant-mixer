@@ -2,19 +2,28 @@ import React from 'react';
 import { PageWrapper, Button, BoxWrapper, LayerStack } from '../../components';
 import { Horizontal, ImageContainer, ButtonGroup, SelectionContainer } from './VariantSelection.styles';
 import PropTypes from 'prop-types';
+import { Redirect } from "react-router-dom";
 
 class VariantSelection extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
           package: null,
-          boxes: []
+          boxes: [],
+          redirect: false
         };
         this.handleClick = this.handleClick.bind(this);
         this.handleExport = this.handleExport.bind(this);
+        this.addToQueue = this.addToQueue.bind(this);
       }
 
     componentDidMount() {
+        if (!this.props.location.state) {
+            this.setState({
+                redirect: true
+            });
+            return;
+        }
         let packagePath = this.props.location.state.packagePath;
         try {
             this.loadPackage(packagePath);
@@ -54,19 +63,27 @@ class VariantSelection extends React.Component {
         });
     }
 
-    async handleExport() {
-        let layers = [].concat(...this.state.package.layers).reduce(function(filtered, layer) {
+    getActiveLayers() {
+        return [].concat(...this.state.package.layers).reduce(function(filtered, layer) {
             if (layer.active) {
-                filtered.push(layer.path);
+                filtered.push({path: layer.path, overlayPath: layer.overlayPath});
             }
             return filtered;
         }, []);
+    }
+
+    async handleExport() {
+        let layers = this.getActiveLayers().map(layer => layer.path);
         await window.mainApi.exportImage({base: this.state.package.path, layers: layers});
+    }
+
+    addToQueue() {
+        this.props.queueHandle({layers: this.getActiveLayers(), path: this.state.package.path, baseImg: this.state.package.img});
     }
 
     get layers() {
         if (this.state.package) {
-            return this.state.package.layers
+            return this.getActiveLayers();
         }
         return []
     }
@@ -79,6 +96,9 @@ class VariantSelection extends React.Component {
     }
 
     render() {
+        if (this.state.redirect) {
+            return <Redirect to='/' />;
+        }
         return (
             <PageWrapper>
                 <Horizontal>
@@ -86,7 +106,7 @@ class VariantSelection extends React.Component {
                         <LayerStack layers={this.layers} baseImg={this.baseImage} />
                         <ButtonGroup>
                             <Button primary onClick={this.handleExport}>Export Image</Button>
-                            <Button primary >Add to queue</Button>
+                            <Button primary onClick={this.addToQueue}>Add to queue</Button>
                         </ButtonGroup>
                     </ImageContainer>
                     <SelectionContainer>
@@ -99,7 +119,8 @@ class VariantSelection extends React.Component {
 }
 
 VariantSelection.propTypes = {
-    location: PropTypes.object.isRequired
+    location: PropTypes.object.isRequired,
+    queueHandle: PropTypes.func.isRequired
 };
 
 export { VariantSelection }

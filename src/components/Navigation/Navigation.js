@@ -1,9 +1,10 @@
 import React from 'react';
 import { QueueBar, LinkButton as Link } from '..';
 import { Navbar, Logo, Horizontal } from './Navigation.styles';
+import PropTypes from 'prop-types';
 
 
-export class Navigation extends React.Component {
+class Navigation extends React.Component {
     render() {
         return (
         <Navbar>
@@ -11,8 +12,18 @@ export class Navigation extends React.Component {
                 <Logo />
                 <Link to="/">Select Package</Link>
             </Horizontal>
-            <QueueBar count={1} />
+            <QueueBar count={this.props.counter} />
         </Navbar>
         );
     }
 }
+
+Navigation.propTypes = {
+    counter: PropTypes.number
+};
+
+Navigation.defaultProps = {
+    counter: 0
+};
+
+export { Navigation }

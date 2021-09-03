@@ -2,7 +2,7 @@ import React from 'react';
 import {HashRouter as Router, Route, Switch} from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
 
-import { PackageSelection, VariantSelection } from './views';
+import { PackageSelection, VariantSelection, ExportQueue } from './views';
 import { Navigation } from './components';
 import styled from 'styled-components';
 
@@ -25,21 +25,44 @@ const Page = styled.div`
   flex-flow: column;
 `;
 
-function App() {
-  console.log(__dirname);
-  return (
-    <ThemeProvider theme={theme}>
-      <Page>
-        <Router>
-          <Navigation />
-          <Switch>
-            <Route path="/variant" render={(props) => <VariantSelection {...props} />} />
-            <Route path="/" component={PackageSelection} />
-          </Switch>
-        </Router>
-      </Page>
-    </ThemeProvider>
-  );
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      queue: []
+    };
+    this.appendQueue = this.appendQueue.bind(this);
+    this.clearQueue = this.clearQueue.bind(this);
+  }
+
+  appendQueue(variant) {
+    this.setState({
+      queue: [...this.state.queue, variant]
+    });
+  }
+
+  clearQueue() {
+    this.setState({
+      queue: []
+    });
+  }
+
+  render() {
+    return (
+      <ThemeProvider theme={theme}>
+        <Page>
+          <Router>
+            <Navigation counter={this.state.queue.length} />
+            <Switch>
+              <Route path="/queue" render={() => <ExportQueue variants={this.state.queue} clearQueue={this.clearQueue} />} />
+              <Route path="/variant" render={(props) => <VariantSelection {...props} queueHandle={this.appendQueue} />} />
+              <Route path="/" component={PackageSelection} />
+            </Switch>
+          </Router>
+        </Page>
+      </ThemeProvider>
+    );
+}
 }
 
 export default App;

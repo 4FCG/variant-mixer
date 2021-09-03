@@ -1,15 +1,14 @@
 import React from 'react';
-import { QueueBody, Counter } from './QueueBar.styles';
+import { QueueBody, Counter, DisabledQueue } from './QueueBar.styles';
 import PropTypes from 'prop-types';
 
 
 class QueueBar extends React.Component {
     render() {
         return (
-            <QueueBody>
-                <div>Export Queue</div>
-                <Counter>{this.props.count}</Counter>
-            </QueueBody>
+            this.props.count > 0
+            ? <QueueBody to="/queue"><div>Export Queue</div><Counter>{this.props.count}</Counter></QueueBody>
+            : <DisabledQueue><div>Export Queue</div><Counter>{this.props.count}</Counter></DisabledQueue>
         );
     }
 }

@@ -23,7 +23,7 @@ function createWindow() {
     height: 720,
     minWidth: 600,
     minHeight: 450,
-    icon: path.join(__dirname + './logo_round.ico'),
+    icon: path.join(__dirname + './icon.ico'),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -45,7 +45,6 @@ function createWindow() {
       })
   );
   // Open the DevTools.
-  //win.webContents.openDevTools({ mode: 'detach' });
   if (isDev) {
     win.webContents.openDevTools({ mode: 'detach' });
   }
@@ -229,7 +228,56 @@ ipcMain.handle("exportImage", async (event, args) => {
   return false;
 });
 
-async function generateComposite(base, layers, savePath, filetype) {
+ipcMain.handle("exportQueue", async (event, args) => {
+  // Retrieve folder through dialog
+  let result = null;
+  try {
+    result = await dialog.showOpenDialog({
+      title: "Select output folder",
+      buttonLabel: "Select",
+      filters: [
+        {
+          name: 'All Files', 
+          extensions: ['*']
+        }
+      ],
+      properties: ['openDirectory']
+    });
+  } catch (err) {
+    console.error(err);
+    return {canceled: true, error: {type: 'error', message: 'Something went wrong during selection.'}};
+  }
+
+  // Catch cancel
+  if (result.canceled) {
+    return {canceled: true, error: null};
+  }
+
+  let folder = result.filePaths[0];
+
+  // Check if folder exists
+  try {
+    access(folder);
+  } catch (err) {
+    console.error(err);
+    return {canceled: true, error: {type: 'error', message: 'The selected folder cannot be reached.'}};
+  }
+
+  // Output images
+  try {
+    let variants = [];
+    for (let [index, variant] of args.entries()) {
+      variants.push(generateComposite(variant.base, variant.layers, path.join(folder, index.toString())));
+    }
+    await Promise.all(variants);
+  } catch (err) {
+    console.error(err);
+    return {canceled: true, error: {type: 'error', message: 'Something went wrong during image creation.'}};
+  }
+  return {canceled: false, error: null};
+});
+
+async function generateComposite(base, layers, savePath, filetype = 'jpeg') {
     const data = await Promise.all(layers.map(layer => sharp(layer).toBuffer()));
     const files = data.map(buffer => ({input: buffer}));
     let composite = sharp(base);
@@ -250,7 +298,6 @@ async function generateComposite(base, layers, savePath, filetype) {
     }
     composite.toFile(`${savePath}.${filetype}`);
     await composite;
-    console.log(`${savePath}.${filetype}`);
 }
 
 ipcMain.handle("importPackage", async () => {
