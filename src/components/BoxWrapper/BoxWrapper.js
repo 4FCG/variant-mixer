@@ -7,9 +7,9 @@ class BoxWrapper extends React.Component {
         return (
             <Wrapper>
                 {this.props.boxes.map((box, index) =>
-                    <ImageBox key={index} data-index={index} image={box.img} active={box.active} onClick={this.props.clickHandle}>
+                    <ImageBox key={index} data-index={index} image={box.img} active={box.active} onClick={this.props.clickHandle} role="img" aria-labelledby={`image-${index}`}>
                         {box.name && 
-                            <NameTag>{box.name}</NameTag>
+                            <NameTag id={`image-${index}`}>{box.name}</NameTag>
                         }
                     </ImageBox>
                 )}

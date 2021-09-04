@@ -3,13 +3,12 @@ import { QueueBar, LinkButton as Link } from '..';
 import { Navbar, Logo, Horizontal } from './Navigation.styles';
 import PropTypes from 'prop-types';
 
-
 class Navigation extends React.Component {
     render() {
         return (
         <Navbar>
             <Horizontal>
-                <Logo />
+                <Logo role="img" />
                 <Link to="/">Select Package</Link>
             </Horizontal>
             <QueueBar count={this.props.counter} />
