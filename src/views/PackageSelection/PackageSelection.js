@@ -22,6 +22,7 @@ export class PackageSelection extends React.Component {
           state: { packagePath: this.state.packages[e.currentTarget.dataset.index].path}
         }
       });
+    // eslint-disable-next-line eqeqeq
     } else if (e.currentTarget.dataset.index == this.state.packages.length) {
       this.importPackage();
     }

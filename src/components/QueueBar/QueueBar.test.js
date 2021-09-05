@@ -1,14 +1,22 @@
-import { render, screen } from '@testing-library/react';
+import React from 'react'
+import { render, screen, fireEvent } from '@testing-library/react';
 import { QueueBar } from './QueueBar';
-import {BrowserRouter as Router} from 'react-router-dom'
+import { BrowserRouter, Router } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
+import PropTypes from 'prop-types';
 
 const MockQueueBar = ({count}) => {
     return (
-    <Router>
+    <BrowserRouter>
         <QueueBar count={count} />
-    </Router>
+    </BrowserRouter>
     );
 };
+
+MockQueueBar.propTypes = {
+    count: PropTypes.number
+};
+
 
 describe("QueueBar", () => {
     test('Displays the correct count', () => {
@@ -19,13 +27,27 @@ describe("QueueBar", () => {
     
     test('Renders link to ExportQueue', () => {
         render(<MockQueueBar count={1} />);
-        const divElement = screen.getByText('Export Queue').closest('a');
-        expect(divElement).toHaveAttribute('href', '/queue');
+        const linkElement = screen.getByRole('link');
+        expect(linkElement).toHaveAttribute('href', '/queue');
     });
     
     test('Disabled when queue is empty', () => {
         render(<MockQueueBar count={0} />);
-        const divElement = screen.getByText('Export Queue').closest('a');
-        expect(divElement).not.toBeInTheDocument();
+        const linkElement = screen.queryByRole('link');
+        expect(linkElement).not.toBeInTheDocument();
+    });
+
+    test('Link redirects to /queue', () => {
+        const history = createBrowserHistory();
+        history.push = jest.fn();
+
+        render(
+            <Router history={history} >
+                <QueueBar count={1} />
+            </Router>
+        );
+
+        fireEvent.click(screen.queryByRole('link'));
+        expect(history.push).toHaveBeenCalledWith('/queue');
     });
 });

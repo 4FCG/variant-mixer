@@ -7,7 +7,7 @@ class QueueBar extends React.Component {
     render() {
         return (
             this.props.count > 0
-            ? <QueueBody to="/queue"><div>Export Queue</div><Counter>{this.props.count}</Counter></QueueBody>
+            ? <QueueBody to="/queue" role="link"><div>Export Queue</div><Counter>{this.props.count}</Counter></QueueBody>
             : <DisabledQueue><div>Export Queue</div><Counter>{this.props.count}</Counter></DisabledQueue>
         );
     }
