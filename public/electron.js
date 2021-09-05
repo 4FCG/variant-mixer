@@ -79,27 +79,34 @@ app.on('activate', () => {
 
 ipcMain.handle("listPackages", async () => {
   let packages = [];
-    let packageFolder = path.join(app.getPath('userData'), '/Packages');
-    try {
-      let files = await readdir(packageFolder);
-      for (let file of files) {
-          let packagePath = path.join(packageFolder, file)
-          if ((await lstat(packagePath)).isDirectory()) {
-              try {
-                let imagePath = await getBaseImage(packagePath);
-                packages.push({
-                    path: packagePath,
-                    img: 'image://' + imagePath.split(path.sep).join(path.posix.sep)
-                });
-              } catch {
-                  console.error(`Base image not found in ${packagePath}`);
-              }
-          }
+  let warning = false;
+  let packageFolder = path.join(app.getPath('userData'), '/Packages');
+  try {
+    let files = await readdir(packageFolder);
+    for (let file of files) {
+      let packagePath = path.join(packageFolder, file)
+      // Check if file is package folder
+      if ((await lstat(packagePath)).isDirectory()) {
+        try {
+          // Attempt to find Base image of package
+          let imagePath = await getBaseImage(packagePath);
+          // Add package to package list
+          packages.push({
+              path: packagePath,
+              img: 'image://' + imagePath.split(path.sep).join(path.posix.sep)
+          });
+        } catch {
+          console.error(`Base image not found in ${packagePath}`);
+          // Enable package could not load warning
+          warning = true;
+        }
       }
-    } catch (err) {
-        console.error(err);
     }
-    return packages;
+  } catch (err) {
+    console.error(err);
+    return {canceled: true, error: {type: 'error', message: 'Something went wrong while loading packages.'}, result: []};
+  }
+  return {canceled: false, error: warning ? {type: 'warning', message: 'One or more packages could not be loaded.'} : null, result: packages};
 });
 
 const allowedExtensions = ['.png', '.jpg', '.jpeg', '.webp'];
@@ -110,7 +117,8 @@ async function getBaseImage(directory) {
     for (let file of files) {
         let imagePath = path.join(directory, file);
         let extension = path.extname(file);
-        if ((await lstat(imagePath)).isFile() && path.basename(file, extension) == 'Base') {
+        // Look for file named Base with one of the allowed extensions
+        if ((await lstat(imagePath)).isFile() && path.basename(file, extension) === 'Base') {
             if (allowedExtensions.includes(extension)) {
               return imagePath;
             }
@@ -119,41 +127,44 @@ async function getBaseImage(directory) {
   } catch (err) {
       console.error(err);
   }
-
-  throw `No base image found in ${directory}`;
+  // Throw error if no base image is found
+  throw new Error(`No base image found in ${directory}`);
 }
 
 ipcMain.handle("loadPackage", async (event, args) => {
   let layers = [];
   try {
-      let files = await readdir(args);
-      for (let file of files) {
-          let layerPath = path.join(args, file);
-          if ((await lstat(layerPath)).isDirectory()) {
-              layers.push(await loadImages(layerPath));
-          }
-      }
+    // Load all the images in the layer folders
+    let files = await readdir(args);
+    for (let file of files) {
+        let layerPath = path.join(args, file);
+        if ((await lstat(layerPath)).isDirectory()) {
+            layers.push(await loadImages(layerPath));
+        }
+    }
   } catch {
-      throw 'Path does not lead to folder.';
+    return {canceled: true, error: {type: 'error', message: 'Path was not a folder'}, result: null};
   }
+  // Load the base image
   let imagePath = null;
   try {
       imagePath = await getBaseImage(args);
   } catch {
-    throw `No Base image found in ${args}`;
+    return {canceled: true, error: {type: 'error', message: 'No base image found in package.'}, result: null};
   }
 
-  return {
+  return {canceled: false, error: null, result: {
     layers: layers,
     path: imagePath,
     img: 'image://' + imagePath.split(path.sep).join(path.posix.sep)
-  };
+  }};
 });
 
 async function loadImages(layerPath) {
   let images = [];
   try {
       let files = await readdir(layerPath);
+      // Get all images in folder
       for (let file of files) {
           let imagePath = path.join(layerPath, file);
           if ((await lstat(imagePath)).isFile()) {
@@ -177,11 +188,12 @@ async function loadImages(layerPath) {
           }
       }
   } catch (err) {
-      console.error(err);
+    console.error(err);
   }
   return images;
 }
 
+// Trims away all the empty pixels in an image and returns a small thumbnail
 async function createThumbnail(imagePath) {
   return await sharp(imagePath)
     .trim()
@@ -191,6 +203,7 @@ async function createThumbnail(imagePath) {
 ipcMain.handle("exportImage", async (event, args) => {
   let result = null;
   try {
+    // Get output path
     result = await dialog.showSaveDialog({
       title: 'Export image',
       defaultPath: 'Variant',
@@ -212,20 +225,21 @@ ipcMain.handle("exportImage", async (event, args) => {
     });
   } catch(err) {
     console.error(err);
-    return false;
+    return {canceled: true, error: {type: 'error', message: 'Something went wrong while selecting export location.'}, result: null};
   }
 
   if (result.canceled) {
-    return false;
+    return {canceled: true, error: null};
   }
 
   try {
+    // Create image
     await generateComposite(args.base, args.layers, result.filePath.split('.').slice(0, -1).join('.'), result.filePath.split('.').pop());
-    return true;
   } catch (err) {
     console.error(err);
+    return {canceled: true, error: {type: 'error', message: 'Something went wrong while generating image.'}, result: null};
   }
-  return false;
+  return {canceled: false, error: null, result: result.filePath.split('.').slice(0, -1).join('.')};
 });
 
 ipcMain.handle("exportQueue", async (event, args) => {
@@ -278,26 +292,32 @@ ipcMain.handle("exportQueue", async (event, args) => {
 });
 
 async function generateComposite(base, layers, savePath, filetype = 'jpeg') {
-    const data = await Promise.all(layers.map(layer => sharp(layer).toBuffer()));
-    const files = data.map(buffer => ({input: buffer}));
-    let composite = sharp(base);
-    if (layers.length > 0) {
-      composite.composite(files);
-    }
-    if (filetype == 'png') {
-      composite.png();
-    } else if (filetype == 'webp') {
-      composite.webp({ quality: 100 })
-    }
-    else {
-      filetype = 'jpeg'
-      composite.jpeg({
-        quality: 100,
-        mozjpeg: true
-      });
-    }
-    composite.toFile(`${savePath}.${filetype}`);
-    await composite;
+  // Get Buffer data from all layers
+  const data = await Promise.all(layers.map(layer => sharp(layer).toBuffer()));
+  // Map to proper input format
+  const files = data.map(buffer => ({input: buffer}));
+  // Load base Image
+  let composite = sharp(base);
+  if (layers.length > 0) {
+    // Generate composite images with all the layers
+    composite.composite(files);
+  }
+  // Output in selected filetype, default jpeg
+  if (filetype === 'png') {
+    composite.png();
+  } else if (filetype === 'webp') {
+    composite.webp({ quality: 100 })
+  }
+  else {
+    filetype = 'jpeg'
+    composite.jpeg({
+      quality: 100,
+      mozjpeg: true
+    });
+  }
+  composite.toFile(`${savePath}.${filetype}`);
+  // Run composite code
+  await composite;
 }
 
 ipcMain.handle("importPackage", async () => {

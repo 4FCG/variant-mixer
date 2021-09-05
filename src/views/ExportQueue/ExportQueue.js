@@ -2,7 +2,7 @@ import React from 'react';
 import { PageWrapper, Button, LayerStack, ErrorBox } from '../../components';
 import PropTypes from 'prop-types';
 import { Redirect } from "react-router-dom";
-import { ImageContainer, QueueBox, ScrollBox } from './ExportQueue.styles';
+import { ImageContainer, QueueBox, ScrollBox, ButtonWrapper } from './ExportQueue.styles';
 
 
 class ExportQueue extends React.Component {
@@ -10,7 +10,8 @@ class ExportQueue extends React.Component {
         super(props);
         this.state = {
             'redirect': null,
-            'error': null
+            'error': null,
+            timer: null
         };
         this.handleClick = this.handleClick.bind(this);
         this.clearButton = this.clearButton.bind(this);
@@ -23,15 +24,7 @@ class ExportQueue extends React.Component {
             // Run export on all images in queue
             let result = await window.mainApi.exportQueue(variants);
             if (result.canceled && result.error) {
-                this.setState({
-                    "error": {type: result.error.type, message: result.error.message}
-                });
-                setTimeout(() => {
-                // After 5 remove error message
-                this.setState({
-                    "error": null
-                });
-                }, 5000);
+                this.setError(result.error.type, result.error.message);
             } else if (!result.canceled) {
                 // clear queue and redirect
                 this.props.clearQueue();
@@ -42,6 +35,18 @@ class ExportQueue extends React.Component {
         } catch (err) {
             console.error(err);
         }
+    }
+
+    setError(type, message) {
+        this.setState({
+            "error": {type: type, message: message},
+            timer: setTimeout(() => {
+                // After 5 remove error message
+                this.setState({
+                "error": null
+                });
+            }, 5000)
+        });
     }
 
     async clearButton() {
@@ -72,8 +77,10 @@ class ExportQueue extends React.Component {
                         )}
                     </QueueBox>
                 </ScrollBox>
-                <Button onClick={this.handleClick}>Export</Button>
-                <Button onClick={this.clearButton}>Clear queue</Button>
+                <ButtonWrapper>
+                    <Button onClick={this.handleClick}>Export</Button>
+                    <Button onClick={this.clearButton}>Clear queue</Button>
+                </ButtonWrapper>
             </PageWrapper>
         );
     }

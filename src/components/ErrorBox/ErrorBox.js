@@ -9,10 +9,10 @@ margin-bottom: 20px;
 color: ${props => props.theme.light};
 opacity: 0.65;
 background-color: ${props => props.theme.secondary};
-${props => props.type == 'error' && css`
+${props => props.type === 'error' && css`
     background-color: #c00;
 `}
-${props => props.type == 'warning' && css`
+${props => props.type === 'warning' && css`
     background-color: #ff7518;
 `}
 `;

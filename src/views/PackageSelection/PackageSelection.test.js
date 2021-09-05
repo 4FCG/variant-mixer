@@ -18,8 +18,46 @@ describe("PackageSelection", () => {
         // Run to apply mockApi
         mockApi();
         render(<PackageSelection />);
+
+        // Check if all images are rendered
         await waitFor(() => {
             expect(screen.getAllByRole('img').length).toBe(3);
+        });
+    });
+
+    test('Display error when one or more packages did not load', async () => {  
+        // mockApi with list packages warning
+        mockApi({listPackagesWarning: true});
+        render(<PackageSelection />);
+
+        await waitFor(() => {
+            expect(screen.getAllByRole('img').length).toBe(2);
+        });
+
+        // Check if error is being displayed
+        await waitFor(() => {
+            expect(screen.getByText(/List Warning/i)).toBeInTheDocument();
+        });
+
+        // Check if error got removed after some time passes
+        await waitFor(() => {
+            expect(screen.queryByText(/List Warning/i)).not.toBeInTheDocument();
+        });
+    });
+
+    test('Displays error when loading packages fails', async () => {  
+        // mockApi with list packages error
+        mockApi({listPackagesError: true});
+        render(<PackageSelection />);
+        
+        // Check if error is being displayed
+        await waitFor(() => {
+            expect(screen.getByText(/List Error/i)).toBeInTheDocument();
+        });
+
+        // Check if error got removed after some time passes
+        await waitFor(() => {
+            expect(screen.queryByText(/List Error/i)).not.toBeInTheDocument();
         });
     });
 

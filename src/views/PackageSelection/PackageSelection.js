@@ -9,7 +9,8 @@ export class PackageSelection extends React.Component {
     this.state = {
       'packages': [],
       'redirect': null,
-      'error': null
+      'error': null,
+      timer: null
     };
     this.handleClick = this.handleClick.bind(this);
   }
@@ -32,15 +33,7 @@ export class PackageSelection extends React.Component {
     try {
       let result = await window.mainApi.importPackage();
       if (result.canceled && result.error) {
-        this.setState({
-          "error": {type: result.error.type, message: result.error.message}
-        });
-        setTimeout(() => {
-          // After 5 remove error message
-          this.setState({
-            "error": null
-          });
-        }, 5000);
+        this.setError(result.error.type, result.error.message);
       } else if (!result.canceled) {
         this.getPackages();
       }
@@ -50,14 +43,36 @@ export class PackageSelection extends React.Component {
   }
 
   async getPackages() {
-    let packages = await window.mainApi.listPackages();
-    this.setState({
-      "packages": packages
-    });
+    let result = await window.mainApi.listPackages();
+    if (result.error) {
+      this.setError(result.error.type, result.error.message);
+    }
+    if (!result.canceled) {
+      this.setState({
+        "packages": result.result
+      });
+    }
   }
 
   componentDidMount() {
     this.getPackages();
+  }
+
+  componentWillUnmount() {
+    // Cancel the error closing timer when unmounting
+    clearTimeout(this.state.timer);
+  }
+
+  setError(type, message) {
+    this.setState({
+      "error": {type: type, message: message},
+      timer: setTimeout(() => {
+        // After 5 remove error message
+        this.setState({
+          "error": null
+        });
+      }, 5000)
+    });
   }
 
   get packages() {

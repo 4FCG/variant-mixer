@@ -18,6 +18,7 @@ export const ImageContainer = styled.div`
     height: 100%;
     display: flex;
     flex-flow: column;
+    box-sizing: border-box;
 `;
 
 export const SelectionContainer = styled.div`

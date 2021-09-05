@@ -4,6 +4,8 @@ export const PageWrapper = styled.div`
     flex: 1 1 auto;
     padding: 20px;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 
     ::-webkit-scrollbar {
         width: 10px;

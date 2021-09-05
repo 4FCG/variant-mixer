@@ -14,6 +14,10 @@ export const ImageContainer = styled.div`
     }
 `;
 
+export const ButtonWrapper = styled.div`
+    display: flex;
+`;
+
 export const QueueBox = styled.div`
     display: inline-flex;
     padding: 10px;
