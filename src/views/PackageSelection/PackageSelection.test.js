@@ -3,7 +3,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { PackageSelection } from './PackageSelection';
 import { mockApi } from '../../services/MainApi.mock';
 import { createBrowserHistory } from "history";
-import { Router } from 'react-router-dom'
+import { Router } from 'react-router-dom';
 
 describe("PackageSelection", () => {
     beforeEach(() => {

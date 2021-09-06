@@ -343,7 +343,7 @@ ipcMain.handle("importPackage", async () => {
   // Ensure a zip file was picked
   if (result.canceled) {
     return {canceled: true, error: null};
-  } else if (result.filePaths.length == 0 || !result.filePaths[0].endsWith('.zip')) {
+  } else if (result.filePaths.length === 0 || !result.filePaths[0].endsWith('.zip')) {
     return {canceled: true, error: {type: 'warning', message: 'Please select a ZIP file.'}};
   }
   
