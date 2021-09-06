@@ -1,5 +1,5 @@
 import React from 'react';
-import { PageWrapper, Button, BoxWrapper, LayerStack, ErrorBox } from '../../components';
+import { PageWrapper, Button, BoxWrapper, LayerStack, ErrorBox, LoadingIcon } from '../../components';
 import { Horizontal, ImageContainer, ButtonGroup, SelectionContainer } from './VariantSelection.styles';
 import PropTypes from 'prop-types';
 import { Redirect } from "react-router-dom";
@@ -12,7 +12,8 @@ class VariantSelection extends React.Component {
           boxes: [],
           redirect: false,
           'error': null,
-          timer: null
+          timer: null,
+          isLoading: true
         };
         this.handleClick = this.handleClick.bind(this);
         this.handleExport = this.handleExport.bind(this);
@@ -63,6 +64,9 @@ class VariantSelection extends React.Component {
                 boxes: boxes
             });
         }
+        this.setState({
+            isLoading: false
+        });
     }
 
     setError(type, message) {
@@ -130,6 +134,8 @@ class VariantSelection extends React.Component {
             return <Redirect to='/' />;
         }
         return (
+            // Display loading icon until page is set to loaded
+            this.state.isLoading ? <LoadingIcon /> :
             <PageWrapper>
                 {this.state.error &&
                     <ErrorBox type={this.state.error.type}>

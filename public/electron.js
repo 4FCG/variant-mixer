@@ -1,12 +1,11 @@
 const path = require('path');
 const fs = require("fs");
-const { readdir, lstat, access, copyFile, rmdir } = require('fs/promises');
+const { readdir, lstat, access, rmdir } = require('fs/promises');
 const sharp = require('sharp');
 const decompress = require("decompress");
 
 const { app, BrowserWindow, ipcMain, protocol, dialog } = require('electron');
 const isDev = require('electron-is-dev');
-const { url } = require('inspector');
 const { format } = require('url');
 
 function setup() {
@@ -16,14 +15,18 @@ function setup() {
   }
 }
 
-function createWindow() {
-  // Create the browser window.
+function createWindow(splash) {
+  // Create the main browser window.
   const win = new BrowserWindow({
+    titleBarStyle: 'hidden',
     width: 1280,
     height: 720,
     minWidth: 600,
     minHeight: 450,
     icon: path.join(__dirname + './icon.ico'),
+    show: false,
+    backgroundColor: "#0B0C10",
+    autoHideMenuBar: true,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -34,7 +37,6 @@ function createWindow() {
   });
 
   // and load the index.html of the app.
-  // win.loadFile("index.html");
   win.loadURL(
     isDev
       ? 'http://localhost:3000'
@@ -44,22 +46,32 @@ function createWindow() {
         slashes: true
       })
   );
-  // Open the DevTools.
-  if (isDev) {
-    win.webContents.openDevTools({ mode: 'detach' });
-  }
+
+  win.once('ready-to-show', () => {
+    splash.destroy();
+    win.show();
+    // Open the DevTools.
+    if (isDev) {
+      win.webContents.openDevTools({ mode: 'detach' });
+    }
+  });
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  // splash screen
+  let splash = new BrowserWindow({width: 300, height: 300, alwaysOnTop: true, frame: false, transparent: true});
+  splash.loadURL(`file://${__dirname}/splash.html`);
+  
   protocol.registerFileProtocol('image', (request, callback) => {
     const url = request.url.substr(7)
     callback({ path: url })
   })
+  
   setup()
-  createWindow()
+  createWindow(splash)
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

@@ -1,5 +1,5 @@
 import React from 'react';
-import { PageWrapper, Button, LayerStack, ErrorBox } from '../../components';
+import { PageWrapper, Button, LayerStack, ErrorBox, LoadingIcon } from '../../components';
 import PropTypes from 'prop-types';
 import { Redirect } from "react-router-dom";
 import { ImageContainer, QueueBox, ScrollBox, ButtonWrapper } from './ExportQueue.styles';
@@ -11,10 +11,17 @@ class ExportQueue extends React.Component {
         this.state = {
             'redirect': null,
             'error': null,
-            timer: null
+            timer: null,
+            isLoading: true
         };
         this.handleClick = this.handleClick.bind(this);
         this.clearButton = this.clearButton.bind(this);
+    }
+
+    componentDidMount() {
+        this.setState({
+            isLoading: false
+        });
     }
 
     async handleClick() {
@@ -62,6 +69,8 @@ class ExportQueue extends React.Component {
             return <Redirect to='/' />
         }
         return (
+            // Display loading icon until page is set to loaded
+            this.state.isLoading ? <LoadingIcon /> :
             <PageWrapper>
                 {this.state.error &&
                     <ErrorBox type={this.state.error.type}>

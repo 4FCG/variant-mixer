@@ -1,6 +1,6 @@
 import React from 'react';
 import { Redirect } from "react-router-dom";
-import { BoxWrapper, PageWrapper, ErrorBox } from '../../components';
+import { BoxWrapper, PageWrapper, ErrorBox, LoadingIcon } from '../../components';
 import plus from '../../assets/plus.webp';
 
 export class PackageSelection extends React.Component {
@@ -10,7 +10,8 @@ export class PackageSelection extends React.Component {
       'packages': [],
       'redirect': null,
       'error': null,
-      timer: null
+      timer: null,
+      isLoading: true
     };
     this.handleClick = this.handleClick.bind(this);
   }
@@ -52,6 +53,9 @@ export class PackageSelection extends React.Component {
         "packages": result.result
       });
     }
+    this.setState({
+      isLoading: false
+    });
   }
 
   componentDidMount() {
@@ -90,7 +94,10 @@ export class PackageSelection extends React.Component {
         return <Redirect to={this.state.redirect} />
       }
       return (
+        // Display loading icon until page is set to loaded
+        this.state.isLoading ? <LoadingIcon /> :
         <PageWrapper>
+          
           {this.state.error &&
            <ErrorBox type={this.state.error.type}>
              {this.state.error.message}
