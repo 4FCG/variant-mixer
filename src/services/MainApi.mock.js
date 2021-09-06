@@ -1,5 +1,6 @@
 import logo from '../assets/logo.png';
 
+// List
 const mockListPackages = {
     canceled: false, 
     error: null, 
@@ -26,8 +27,29 @@ const mockListPackagesWarning = {
 };
 const mockListPackagesError = {canceled: true, error: {type: 'error', message: 'List Error'}, result: []};
 
+// Import
 const mockImportPackage = {canceled: false, error: null};
 const mockImportPackageError = {canceled: true, error: {type: 'error', message: 'Test Error'}};
+
+// Load
+const mockLoadPackage = {canceled: false, error: null, result: {
+    path: logo,
+    img: logo,
+    layers: [
+        [
+            {path: logo, previewPath: logo, overlayPath: logo, name: "Sample Layer 1", active: false},
+            {path: logo, previewPath: logo, overlayPath: logo, name: "Sample Layer 2", active: false},
+        ],
+        [
+            {path: logo, previewPath: logo, overlayPath: logo, name: "Sample Layer 3", active: false},
+        ]
+    ]
+}};
+const mockLoadPackageError = {canceled: true, error: {type: 'error', message: 'Sample Error'}, result: null};
+
+// Export
+const mockExportImage = {canceled: false, error: null, result: "/folder/SampleImage"};
+const mockExportImageError = {canceled: true, error: {type: 'error', message: 'Export Error'}, result: null};
 
 // Run to mock the Api
 export function mockApi(options) {
@@ -42,6 +64,8 @@ export function mockApi(options) {
 
     window.mainApi = {
         listPackages: jest.fn().mockResolvedValue(listPackagesMock),
-        importPackage: jest.fn().mockResolvedValue(options?.importPackageError ? mockImportPackageError : mockImportPackage)
+        importPackage: jest.fn().mockResolvedValue(options?.importPackageError ? mockImportPackageError : mockImportPackage),
+        loadPackage: jest.fn().mockResolvedValue(options?.loadPackageError ? mockLoadPackageError : mockLoadPackage),
+        exportImage: jest.fn().mockResolvedValue(options?.exportImageError ? mockExportImageError : mockExportImage),
     };
 }
