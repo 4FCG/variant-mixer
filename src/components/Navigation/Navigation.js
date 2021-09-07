@@ -8,7 +8,7 @@ class Navigation extends React.Component {
         return (
         <Navbar>
             <Horizontal>
-                <Logo role="img" />
+                <Logo />
                 <Link to="/">Select Package</Link>
             </Horizontal>
             <QueueBar count={this.props.counter} />
