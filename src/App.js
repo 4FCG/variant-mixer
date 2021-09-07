@@ -11,7 +11,8 @@ const theme = {
   secondary: "#1F2833",
   light: "#C5C6C7",
   primary: "#66FCF1",
-  dark: "#45A29E"
+  dark: "#45A29E",
+  highlight: "#3f5168"
 }
 
 const Page = styled.div`
@@ -33,6 +34,15 @@ class App extends React.Component {
     };
     this.appendQueue = this.appendQueue.bind(this);
     this.clearQueue = this.clearQueue.bind(this);
+    this.popQueue = this.popQueue.bind(this);
+  }
+
+  popQueue(index) {
+    const newQueue = [...this.state.queue];
+    newQueue.splice(index, 1);
+    this.setState({
+      queue: newQueue
+    });
   }
 
   appendQueue(variant) {
@@ -54,7 +64,7 @@ class App extends React.Component {
           <Router>
             <Navigation counter={this.state.queue.length} />
             <Switch>
-              <Route path="/queue" render={() => <ExportQueue variants={this.state.queue} clearQueue={this.clearQueue} />} />
+              <Route path="/queue" render={() => <ExportQueue variants={this.state.queue} clearQueue={this.clearQueue} popQueue={this.popQueue} />} />
               <Route path="/variant" render={(props) => <VariantSelection {...props} queueHandle={this.appendQueue} />} />
               <Route path="/" component={PackageSelection} />
             </Switch>

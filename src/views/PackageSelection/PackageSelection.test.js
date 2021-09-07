@@ -138,4 +138,101 @@ describe("PackageSelection", () => {
         });
     });
 
+    test('Right click on a package opens the contextmenu', async () => {
+        mockApi();
+
+        render(
+            <PackageSelection />
+        );
+
+        // Wait until API results are rendered
+        await waitFor(() => {
+            expect(screen.getAllByRole('img').length).toBe(3);
+        });
+
+        let packages = await screen.findAllByRole('img');
+        fireEvent.contextMenu(packages[0]);
+
+        // Check if contextmenu opens with delete button
+        await waitFor(() => {
+            expect(screen.getByRole('button', {name: /Delete Package/i})).toBeInTheDocument();
+        });
+    });
+
+    test('Delete button closes menu', async () => {
+        mockApi();
+
+        render(
+            <PackageSelection />
+        );
+
+        // Wait until API results are rendered
+        await waitFor(() => {
+            expect(screen.getAllByRole('img').length).toBe(3);
+        });
+
+        let packages = await screen.findAllByRole('img');
+        fireEvent.contextMenu(packages[0]);
+
+        // Wait for delete button
+        let deleteButton = await screen.findByRole('button', {name: /Delete Package/i});
+        fireEvent.click(deleteButton);
+
+        await waitFor(() => {
+            // Menu should close after click
+            expect(screen.queryByRole('button', {name: /Delete Package/i})).not.toBeInTheDocument();
+        });
+    });
+
+    test('Delete button calls delete API', async () => {
+        mockApi();
+        const deletePackage = jest.spyOn(window.mainApi, 'deletePackage');
+
+        render(
+            <PackageSelection />
+        );
+
+        // Wait until API results are rendered
+        await waitFor(() => {
+            expect(screen.getAllByRole('img').length).toBe(3);
+        });
+
+        let packages = await screen.findAllByRole('img');
+        fireEvent.contextMenu(packages[0]);
+
+        // Wait for delete button
+        let deleteButton = await screen.findByRole('button', {name: /Delete Package/i});
+        fireEvent.click(deleteButton);
+
+        await waitFor(() => {
+            // Delete should be ran with logo.png, this is what the mock api sets as path
+            expect(deletePackage).toBeCalledWith("logo.png");
+        });
+    });
+
+    test('Delete renders error message upon failure', async () => {
+        mockApi({deletePackageError: true});
+
+        render(
+            <PackageSelection />
+        );
+
+        // Wait until API results are rendered
+        await waitFor(() => {
+            expect(screen.getAllByRole('img').length).toBe(3);
+        });
+
+        let packages = await screen.findAllByRole('img');
+        fireEvent.contextMenu(packages[0]);
+
+        // Wait for delete button
+        let deleteButton = await screen.findByRole('button', {name: /Delete Package/i});
+        fireEvent.click(deleteButton);
+
+        await waitFor(() => {
+            // Check if error is displayed
+            expect(screen.getByText(/Delete Error/i)).toBeInTheDocument();
+        });
+    });
+
 });

@@ -7,7 +7,7 @@ class BoxWrapper extends React.Component {
         return (
             <Wrapper>
                 {this.props.boxes.map((box, index) =>
-                    <ImageBox key={index} data-index={index} image={box.img} active={box.active} onClick={this.props.clickHandle} role="img" aria-labelledby={`image-${index}`} >
+                    <ImageBox key={index} data-index={index} image={box.img} active={box.active} onClick={this.props.clickHandle} role="img" aria-labelledby={`image-${index}`} onContextMenu={this.props.contextHandle} >
                         {box.name && 
                             <NameTag id={`image-${index}`}>{box.name}</NameTag>
                         }
@@ -19,12 +19,14 @@ class BoxWrapper extends React.Component {
 }
 
 BoxWrapper.defaultProps = {
-    boxes: []
+    boxes: [],
+    contextHandle: () => {}
 };
 
 BoxWrapper.propTypes = {
     boxes: PropTypes.array,
-    clickHandle: PropTypes.func
+    clickHandle: PropTypes.func,
+    contextHandle: PropTypes.func
 };
 
 export { BoxWrapper };

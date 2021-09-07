@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require("fs");
 const { readdir, lstat, access, rmdir } = require('fs/promises');
 const sharp = require('sharp');
-const decompress = require("decompress");
+const extract = require('extract-zip')
 
 const { app, BrowserWindow, ipcMain, protocol, dialog } = require('electron');
 const isDev = require('electron-is-dev');
@@ -105,7 +105,7 @@ ipcMain.handle("listPackages", async () => {
           // Add package to package list
           packages.push({
               path: packagePath,
-              img: 'image://' + imagePath.split(path.sep).join(path.posix.sep)
+              img: '"image://' + imagePath.split(path.sep).join(path.posix.sep) + '"'
           });
         } catch {
           console.error(`Base image not found in ${packagePath}`);
@@ -168,7 +168,7 @@ ipcMain.handle("loadPackage", async (event, args) => {
   return {canceled: false, error: null, result: {
     layers: layers,
     path: imagePath,
-    img: 'image://' + imagePath.split(path.sep).join(path.posix.sep)
+    img: '"image://' + imagePath.split(path.sep).join(path.posix.sep) + '"'
   }};
 });
 
@@ -192,8 +192,8 @@ async function loadImages(layerPath) {
               }
               images.push({
                 path: imagePath,
-                previewPath: 'image://' + thumbnail.split(path.sep).join(path.posix.sep),
-                overlayPath: 'image://' + imagePath.split(path.sep).join(path.posix.sep),
+                previewPath: '"image://' + thumbnail.split(path.sep).join(path.posix.sep) + '"',
+                overlayPath: '"image://' + imagePath.split(path.sep).join(path.posix.sep) + '"',
                 name: name
               });
             }
@@ -363,15 +363,18 @@ ipcMain.handle("importPackage", async () => {
   let source = result.filePaths[0];
   let folderName = path.basename(source, path.extname(source));
   let outputFolder = path.join(app.getPath('userData'), `/Packages/${folderName}`);
-  let files = [];
   try {
-    files = await decompress(source, outputFolder);
+    // Unzip, filter out empty folders called / to prevent crash
+    await extract(source, { dir: outputFolder })
   } catch (err) {
     console.error(err);
     return {canceled: true, error: {type: 'error', message: 'Something went wrong during file processing.'}};
   }
+
   // check if Base image exists
-  if (!files.some(file => file.path.includes('Base.'))) {
+  try {
+    await getBaseImage(outputFolder);
+  } catch {
     // remove bad package from folder
     try {
       await rmdir(outputFolder, { recursive: true });
@@ -379,6 +382,26 @@ ipcMain.handle("importPackage", async () => {
       console.error(err);
     }
     return {canceled: true, error: {type: 'warning', message: 'The package is not in the correct format.'}};
+  }
+
+  return {canceled: false, error: null};
+});
+
+ipcMain.handle("deletePackage", async (event, args) => {
+
+  // Check if the args folder is a subpath of the packages folder
+  const relative = path.relative(path.join(app.getPath('userData'), '/Packages'), args);
+  const isSubDir = relative && !relative.startsWith('..') && !path.isAbsolute(relative);
+  
+  // Check if given path is a package path
+  if (!isSubDir) {
+    return {canceled: true, error: {type: 'error', message: 'The path did not point to a package folder'}};
+  }
+  try {
+    await rmdir(args, { recursive: true });
+  } catch (err) {
+    console.error(err);
+    return {canceled: true, error: {type: 'error', message: 'Something went wrong while deleting the package'}};
   }
 
   return {canceled: false, error: null};

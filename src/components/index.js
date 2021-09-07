@@ -6,5 +6,6 @@ import { PageWrapper } from "./PageWrapper/PageWrapper";
 import { LayerStack } from "./LayerStack/LayerStack";
 import { ErrorBox } from "./ErrorBox/ErrorBox";
 import { LoadingIcon } from "./LoadingIcon/LoadingIcon";
+import { ContextMenu } from './ContextMenu/ContextMenu'
 
-export { Button, Navigation, QueueBar, BoxWrapper, PageWrapper, LayerStack, LinkButton, ErrorBox, LoadingIcon }
+export { Button, Navigation, QueueBar, BoxWrapper, PageWrapper, LayerStack, LinkButton, ErrorBox, LoadingIcon, ContextMenu }

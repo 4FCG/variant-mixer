@@ -1,6 +1,6 @@
 {
   "name": "variant-mixer",
-  "version": "0.2.2",
+  "version": "1.0.0",
   "author": "4FCG",
   "private": true,
   "description": "Application to create your own image variants.",
@@ -8,8 +8,8 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
-    "decompress": "^4.2.1",
     "electron-is-dev": "^2.0.0",
+    "extract-zip": "^2.0.1",
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

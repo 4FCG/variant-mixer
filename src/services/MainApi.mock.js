@@ -67,6 +67,10 @@ export const mockQueueState = new Array(3).fill({
 const mockExportQueue = {canceled: false, error: null};
 const mockExportQueueError = {canceled: true, error: {type: 'error', message: 'Queue Error'}};
 
+// Delete
+const mockDeletePackage = {canceled: false, error: null};
+const mockDeletePackageError = {canceled: true, error: {type: 'error', message: 'Delete Error'}};
+
 // Run to mock the Api
 export function mockApi(options) {
     let listPackagesMock = null;
@@ -83,6 +87,7 @@ export function mockApi(options) {
         importPackage: jest.fn().mockResolvedValue(options?.importPackageError ? mockImportPackageError : mockImportPackage),
         loadPackage: jest.fn().mockResolvedValue(options?.loadPackageError ? mockLoadPackageError : mockLoadPackage),
         exportImage: jest.fn().mockResolvedValue(options?.exportImageError ? mockExportImageError : mockExportImage),
-        exportQueue: jest.fn().mockResolvedValue(options?.exportQueueError ? mockExportQueueError : mockExportQueue)
+        exportQueue: jest.fn().mockResolvedValue(options?.exportQueueError ? mockExportQueueError : mockExportQueue),
+        deletePackage: jest.fn().mockResolvedValue(options?.deletePackageError ? mockDeletePackageError : mockDeletePackage),
     };
 }

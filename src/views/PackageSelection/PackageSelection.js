@@ -1,6 +1,6 @@
 import React from 'react';
 import { Redirect } from "react-router-dom";
-import { BoxWrapper, PageWrapper, ErrorBox, LoadingIcon } from '../../components';
+import { BoxWrapper, PageWrapper, ErrorBox, LoadingIcon, ContextMenu } from '../../components';
 import plus from '../../assets/plus.webp';
 
 export class PackageSelection extends React.Component {
@@ -11,9 +11,13 @@ export class PackageSelection extends React.Component {
       'redirect': null,
       'error': null,
       timer: null,
-      isLoading: true
+      isLoading: true,
+      showMenu: null
     };
     this.handleClick = this.handleClick.bind(this);
+    this.handleContext = this.handleContext.bind(this);
+    this.handleHideMenu = this.handleHideMenu.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
   }
 
   handleClick(e) {
@@ -79,6 +83,58 @@ export class PackageSelection extends React.Component {
     });
   }
 
+  handleContext(event) {
+    event.preventDefault();
+
+    // Get position
+    const pos = {
+      x: event.pageX + "px",
+      y: event.pageY + "px"
+    };
+
+    // Check if not clicked on a box
+    if (!event.currentTarget.dataset) {
+      // hide menu
+      this.setState({
+        showMenu: null
+      });
+      return;
+    }
+
+    // Check if clicked box was not the import button
+    if (event.currentTarget.dataset.index < this.state.packages.length) {
+      // Show menu
+      this.setState({
+        showMenu: {
+          pos: pos,
+          index: event.currentTarget.dataset.index
+        }
+      });
+    }
+  }
+
+  handleHideMenu() {
+    this.setState({
+      showMenu: null
+    });
+  }
+
+  handleDelete(e) {
+    this.handleHideMenu();
+    this.deletePackage(this.state.packages[e.currentTarget.dataset.index].path);
+  }
+
+  async deletePackage(path) {
+    let result = await window.mainApi.deletePackage(path);
+    if (result.error) {
+      this.setError(result.error.type, result.error.message);
+    }
+    if (!result.canceled) {
+      // Reload packages
+      this.getPackages();
+    }
+  }
+
   get packages() {
     let packages = this.state.packages.map(pack => {
       return {
@@ -89,6 +145,21 @@ export class PackageSelection extends React.Component {
     return packages;
   }
 
+  get contextMenu() {
+    // Generate context menu
+    if (this.state.showMenu) {
+      const DeleteButton = {
+        message: "Delete Package",
+        handle: this.handleDelete,
+        index: this.state.showMenu.index
+      }
+      return <ContextMenu pos={this.state.showMenu.pos} hide={this.handleHideMenu} buttons={[DeleteButton]}/>
+    }
+    else {
+      return null;
+    }
+  }
+
   render() {
       if (this.state.redirect) {
         return <Redirect to={this.state.redirect} />
@@ -97,13 +168,13 @@ export class PackageSelection extends React.Component {
         // Display loading icon until page is set to loaded
         this.state.isLoading ? <LoadingIcon /> :
         <PageWrapper>
-          
+          {this.contextMenu}
           {this.state.error &&
            <ErrorBox type={this.state.error.type}>
              {this.state.error.message}
            </ErrorBox> 
           }
-          <BoxWrapper boxes={this.packages} clickHandle={this.handleClick} />
+          <BoxWrapper boxes={this.packages} clickHandle={this.handleClick} contextHandle={this.handleContext} />
         </PageWrapper>
       );
     }

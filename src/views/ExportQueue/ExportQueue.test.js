@@ -18,7 +18,7 @@ describe("ExportQueue", () => {
         // Run to apply mockApi
         mockApi();
 
-        render(<ExportQueue variants={mockQueueState} clearQueue={jest.fn()} />);
+        render(<ExportQueue variants={mockQueueState} clearQueue={jest.fn()} popQueue={jest.fn()} />);
 
         // Check if all images in queue are rendered
         await waitFor(() => {
@@ -35,7 +35,7 @@ describe("ExportQueue", () => {
 
         render(
             <Router history={history}>
-                <ExportQueue variants={mockQueueState} clearQueue={jest.fn()} />
+                <ExportQueue variants={mockQueueState} clearQueue={jest.fn()} popQueue={jest.fn()} />
             </Router>
         );
 
@@ -54,7 +54,7 @@ describe("ExportQueue", () => {
     test('Renders queue export error', async () => {  
         mockApi({exportQueueError: true});
 
-        render(<ExportQueue variants={mockQueueState} clearQueue={jest.fn()} />);
+        render(<ExportQueue variants={mockQueueState} clearQueue={jest.fn()} popQueue={jest.fn()} />);
 
         // Click export button
         let exportButton = screen.getByRole('button', {name: /Export/i});
@@ -78,7 +78,7 @@ describe("ExportQueue", () => {
 
         render(
             <Router history={history}>
-                <ExportQueue variants={mockQueueState} clearQueue={clearQueue} />
+                <ExportQueue variants={mockQueueState} clearQueue={clearQueue} popQueue={jest.fn()} />
             </Router>
         );
 
@@ -93,5 +93,47 @@ describe("ExportQueue", () => {
                 "pathname": "/"
             }));
         });
+    });
+
+    test('Right click on image opens contextmenu', async () => {  
+        mockApi();
+
+        render(<ExportQueue variants={mockQueueState} clearQueue={jest.fn()} popQueue={jest.fn()} />);
+
+        // Wait for render
+        await waitFor(() => {
+            expect(screen.getAllByRole('img')).toHaveLength(3);
+        });
+
+        fireEvent.contextMenu(screen.getAllByRole('img')[0]);
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', {name: /Remove from queue/i})).toBeInTheDocument();
+        });
+    });
+
+    test('Remove from queue calls popQueue', async () => {  
+        mockApi();
+
+        const popQueue = jest.fn();
+        render(<ExportQueue variants={mockQueueState} clearQueue={jest.fn()} popQueue={popQueue} />);
+
+        // Wait for render
+        await waitFor(() => {
+            expect(screen.getAllByRole('img')).toHaveLength(3);
+        });
+
+        fireEvent.contextMenu(screen.getAllByRole('img')[0]);
+
+        const removeButton = await screen.findByRole('button', {name: /Remove from queue/i});
+        fireEvent.click(removeButton);
+
+        // Check if popQueue was called with correct index
+        await waitFor(() => {
+            expect(popQueue).toHaveBeenCalledWith("0");
+            // Menu should close after click
+            expect(screen.queryByRole('button', {name: /Remove from queue/i})).not.toBeInTheDocument();
+        });
+        
     });
 });
