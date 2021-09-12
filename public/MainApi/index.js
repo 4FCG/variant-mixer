@@ -4,5 +4,6 @@ const exportImage = require('./exportImage/exportImage');
 const exportQueue = require('./exportQueue/exportQueue');
 const importPackage = require('./importPackage/importPackage');
 const deletePackage = require('./deletePackage/deletePackage');
+const restartApp = require('./restartApp/restartApp');
 
-module.exports = [listPackages, loadPackages, exportImage, exportQueue, importPackage, deletePackage];
+module.exports = [listPackages, loadPackages, exportImage, exportQueue, importPackage, deletePackage, restartApp];

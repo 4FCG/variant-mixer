@@ -1,6 +1,6 @@
 {
   "name": "variant-mixer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "4FCG",
   "private": true,
   "description": "Application to create your own image variants.",
@@ -9,6 +9,7 @@
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
     "electron-is-dev": "^2.0.0",
+    "electron-updater": "^4.3.9",
     "extract-zip": "^2.0.1",
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
@@ -27,7 +28,8 @@
     "eject": "react-scripts eject",
     "dev": "concurrently -k \"cross-env BROWSER=none npm run start\" \"npm:electron\"",
     "electron": "wait-on tcp:3000 && electron .",
-    "dist": "npm run build && electron-builder -c.extraMetadata.main=build/electron.js"
+    "dist": "npm run build && electron-builder -c.extraMetadata.main=build/electron.js --win --publish never",
+    "publish": "npm run build && electron-builder -c.extraMetadata.main=build/electron.js --win --publish always"
   },
   "browserslist": {
     "production": [
@@ -52,6 +54,10 @@
     "eslint-plugin-testing-library": "^4.12.0",
     "wait-on": "^6.0.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/4FCG/variant-mixer.git"
+  },
   "build": {
     "appId": "com.4fcg.variant-mixer",
     "productName": "variant-mixer",
@@ -69,6 +75,10 @@
     "nsis": {
       "allowToChangeInstallationDirectory": true,
       "oneClick": false
+    },
+    "publish": {
+      "provider": "github",
+      "private": true
     }
   }
 }

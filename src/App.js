@@ -1,10 +1,9 @@
 import React from 'react';
-import {BrowserRouter as Router, Route, Switch} from 'react-router-dom'
-import { ThemeProvider } from 'styled-components'
+import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 
 import { PackageSelection, VariantSelection, ExportQueue } from './views';
-import { Navigation } from './components';
-import styled from 'styled-components';
+import { Navigation, Notification } from './components';
+import styled, { ThemeProvider } from 'styled-components';
 
 const theme = {
   main: "#0B0C10",
@@ -30,11 +29,30 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      queue: []
+      queue: [],
+      notification: null,
+      restartButton: false
     };
     this.appendQueue = this.appendQueue.bind(this);
     this.clearQueue = this.clearQueue.bind(this);
     this.popQueue = this.popQueue.bind(this);
+    this.handleClose = this.handleClose.bind(this);
+    this.handleRestart = this.handleRestart.bind(this);
+  }
+
+  componentDidMount() {
+    window.mainApi.onEvent("updateAvailable", () => {
+      this.setState({
+        notification: "A new update is available, downloading..."
+      });
+    });
+
+    window.mainApi.onEvent("updateDownloaded", () => {
+      this.setState({
+        notification: "Update downloaded, it will install on restart. Restart now?",
+        restartButton: true
+      });
+    });
   }
 
   popQueue(index) {
@@ -57,6 +75,23 @@ class App extends React.Component {
     });
   }
 
+  handleClose() {
+    this.setState({
+      notification: null
+    });
+  }
+
+  handleRestart() {
+    window.mainApi.restartApp();
+  }
+
+  get notification() {
+    if (this.state.notification) {
+      return <Notification message={this.state.notification} onClose={this.handleClose} onRestart={this.handleRestart} restartButton={this.state.restartButton}/>;
+    }
+    return null;
+  }
+
   render() {
     return (
       <ThemeProvider theme={theme}>
@@ -69,6 +104,7 @@ class App extends React.Component {
               <Route path="/" component={PackageSelection} />
             </Switch>
           </Router>
+          {this.notification}
         </Page>
       </ThemeProvider>
     );

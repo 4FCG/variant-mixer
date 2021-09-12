@@ -3,8 +3,12 @@ const { existsSync, mkdirSync} = require("fs");
 const { app, BrowserWindow, protocol } = require('electron');
 const isDev = require('electron-is-dev');
 const { format } = require('url');
+const { autoUpdater } = require('electron-updater');
 
 const events = require('./MainApi/index.js');
+
+// Global reference to the main window
+let win;
 
 // Creates the Packages folder
 function setup() {
@@ -16,7 +20,7 @@ function setup() {
 
 function createWindow(splash) {
   // Create the main browser window.
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     titleBarStyle: 'hidden',
     width: 1280,
     height: 720,
@@ -47,12 +51,22 @@ function createWindow(splash) {
   );
 
   win.once('ready-to-show', () => {
+    // Remove splash screen and show app
     splash.destroy();
     win.show();
+
+    // Check for updates
+    autoUpdater.checkForUpdatesAndNotify();
+
     // Open the DevTools.
     if (isDev) {
       win.webContents.openDevTools({ mode: 'detach' });
     }
+
+    setTimeout(() => {
+      win.webContents.send('updateAvailable');
+    }, 5000)
+    
   });
 }
 
@@ -90,3 +104,11 @@ app.on('activate', () => {
 
 // Load ipcMain handles, these are the API functions given to the react app
 events.forEach(event => event.configure());
+
+autoUpdater.on('update-available', () => {
+  win.webContents.send('updateAvailable');
+});
+
+autoUpdater.on('update-downloaded', () => {
+  win.webContents.send('updateDownloaded');
+});
