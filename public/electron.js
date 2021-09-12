@@ -62,11 +62,6 @@ function createWindow(splash) {
     if (isDev) {
       win.webContents.openDevTools({ mode: 'detach' });
     }
-
-    setTimeout(() => {
-      win.webContents.send('updateAvailable');
-    }, 5000)
-    
   });
 }
 
