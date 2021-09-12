@@ -1,6 +1,6 @@
 {
   "name": "variant-mixer",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "author": "4FCG",
   "private": true,
   "description": "Application to create your own image variants.",
@@ -77,8 +77,7 @@
       "oneClick": false
     },
     "publish": {
-      "provider": "github",
-      "private": true
+      "provider": "github"
     }
   }
 }
