@@ -1,12 +1,6 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const PageWrapper = styled.div`
-    flex: 1 1 auto;
-    padding: 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-
+export const scrollbar = css`
     ::-webkit-scrollbar {
         width: 10px;
     }
@@ -24,4 +18,13 @@ export const PageWrapper = styled.div`
     ::-webkit-scrollbar-thumb:hover {
         background: ${props => props.theme.dark} 
     }
+`;
+
+export const PageWrapper = styled.div`
+    flex: 1 1 auto;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    ${scrollbar}
 `;

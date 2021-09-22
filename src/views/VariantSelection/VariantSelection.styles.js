@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { scrollbar } from '../../components';
 
 export const Horizontal = styled.div`
     display: flex;
@@ -14,7 +15,8 @@ export const ButtonGroup = styled.div`
 `;
 
 export const ImageContainer = styled.div`
-    flex-grow: 1;
+    flex-basis: 0;
+    flex-grow: 2;
     height: 100%;
     display: flex;
     flex-flow: column;
@@ -22,6 +24,9 @@ export const ImageContainer = styled.div`
 `;
 
 export const SelectionContainer = styled.div`
-    flex-grow: 2;
+    flex-basis: 0;    
+    flex-grow: 1;
     margin-left: 20px;
+    overflow-y: auto;
+    ${scrollbar}
 `;

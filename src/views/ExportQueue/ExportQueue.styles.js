@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { scrollbar } from '../../components';
 
 export const ImageContainer = styled.div`
     height: 200px;
@@ -29,22 +30,5 @@ export const QueueBox = styled.div`
 export const ScrollBox = styled.div`
     margin-bottom: 10px;
     overflow-x: auto;
-
-    ::-webkit-scrollbar {
-        width: 5px;
-    }
-
-    ::-webkit-scrollbar-track {
-        border-radius: 10px;
-        background: ${props => props.theme.secondary}
-    }
-
-    ::-webkit-scrollbar-thumb {
-        border-radius: 10px;
-        background: ${props => props.theme.primary}
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: ${props => props.theme.dark} 
-    }
+    ${scrollbar}
 `;
