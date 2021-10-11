@@ -89,5 +89,6 @@ export function mockApi(options) {
         exportImage: jest.fn().mockResolvedValue(options?.exportImageError ? mockExportImageError : mockExportImage),
         exportQueue: jest.fn().mockResolvedValue(options?.exportQueueError ? mockExportQueueError : mockExportQueue),
         deletePackage: jest.fn().mockResolvedValue(options?.deletePackageError ? mockDeletePackageError : mockDeletePackage),
+        onEvent: jest.fn()
     };
 }

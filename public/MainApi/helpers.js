@@ -74,10 +74,26 @@ module.exports.generateComposite = async function generateComposite(base, layers
   const files = data.map(buffer => ({input: buffer}));
   // Load base Image
   let composite = sharp(base);
-  if (layers.length > 0) {
-    // Generate composite images with all the layers
-    composite.composite(files);
+
+  // Get image size
+  let metadata = await composite.metadata();
+  let width = metadata.width;
+  let height = metadata.height;
+
+  // create watermark
+  let watermark = sharp(join(join(__dirname, '../'), './watermark.png'));
+  if (width > height) {
+    watermark.resize({height: Math.floor(height * 0.2)});
+  } else {
+    watermark.resize({width: Math.floor(width * 0.2)});
   }
+  watermark = await watermark.toBuffer();
+  files.push({
+    input: watermark,
+    gravity: 'southeast'
+  });
+  // Generate composite images with all the layers
+  composite.composite(files);
   // Output in selected filetype, default jpeg
   if (filetype === 'png') {
     composite.png();
@@ -91,7 +107,7 @@ module.exports.generateComposite = async function generateComposite(base, layers
       mozjpeg: true
     });
   }
-  composite.toFile(`${savePath}.${filetype}`);
+  await composite.toFile(`${savePath}.${filetype}`);
   // Run composite code
-  return await composite;
+  // return await composite;
 }

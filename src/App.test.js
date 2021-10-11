@@ -119,4 +119,88 @@ describe("App integration testing", () => {
             expect(screen.getAllByRole('img').length).toBe(1);
         });
     });
+
+    test('Renders update available notification', async () => {
+        // Mock the mainApi
+        mockApi();
+
+        // Implement mock event to only trigger updateAvailable
+        window.mainApi.onEvent.mockImplementation((type, callback) => {
+            if (type === "updateAvailable") {
+                callback();
+            }
+        });
+
+        render(<App />);
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', {name: /Close/i})).toBeInTheDocument();
+            expect(screen.queryByRole('button', {name: /Restart/i})).not.toBeInTheDocument();
+        });
+    });
+
+    test('Renders update downloaded notification', async () => {
+        // Mock the mainApi
+        mockApi();
+
+        // Implement mock event to only trigger updateDownloaded
+        window.mainApi.onEvent.mockImplementation((type, callback) => {
+            if (type === "updateDownloaded") {
+                callback();
+            }
+        });
+
+        render(<App />);
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', {name: /Close/i})).toBeInTheDocument();
+            expect(screen.getByRole('button', {name: /Restart/i})).toBeInTheDocument();
+        });
+    });
+
+    test('Pressing close closes the notification', async () => {
+        // Mock the mainApi
+        mockApi();
+
+        // Implement mock event to only trigger updateAvailable
+        window.mainApi.onEvent.mockImplementation((type, callback) => {
+            if (type === "updateAvailable") {
+                callback();
+            }
+        });
+
+        render(<App />);
+
+        const closeButton = await screen.findByRole('button', {name: /Close/i});
+        // Click the close button
+        fireEvent.click(closeButton);
+
+        await waitFor(() => {
+            expect(screen.queryByRole('button', {name: /Close/i})).not.toBeInTheDocument();
+        });
+    });
+
+    test('Pressing restart runs restart function', async () => {
+        // Mock the mainApi
+        mockApi();
+
+        // Implement mock event to only trigger updateAvailable
+        window.mainApi.onEvent.mockImplementation((type, callback) => {
+            if (type === "updateDownloaded") {
+                callback();
+            }
+        });
+
+        window.mainApi.restartApp = jest.fn();
+
+        render(<App />);
+
+        const restartButton = await screen.findByRole('button', {name: /Restart/i});
+        // Click the restart button
+        fireEvent.click(restartButton);
+
+        await waitFor(() => {
+            expect(window.mainApi.restartApp).toHaveBeenCalled();
+        });
+    });
 });
