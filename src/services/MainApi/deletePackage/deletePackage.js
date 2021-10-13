@@ -17,7 +17,6 @@ module.exports = {
             try {
               await fs.promises.rmdir(args, { recursive: true });
             } catch (err) {
-              console.error(err);
               return {canceled: true, error: {type: 'error', message: 'Something went wrong while deleting the package'}};
             }
           

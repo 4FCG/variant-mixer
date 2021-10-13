@@ -27,7 +27,6 @@ module.exports = {
                     ]
                 });
             } catch(err) {
-                console.error(err);
                 return {canceled: true, error: {type: 'error', message: 'Something went wrong while selecting export location.'}, result: null};
             }
           
@@ -39,7 +38,6 @@ module.exports = {
                 // Create image
                 await generateComposite(args.base, args.layers, result.filePath.split('.').slice(0, -1).join('.'), result.filePath.split('.').pop());
             } catch (err) {
-                console.error(err);
                 return {canceled: true, error: {type: 'error', message: 'Something went wrong while generating image.'}, result: null};
             }
             return {canceled: false, error: null, result: result.filePath.split('.').slice(0, -1).join('.')};

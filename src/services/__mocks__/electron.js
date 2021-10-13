@@ -3,4 +3,7 @@ export const ipcMain = {
 };
 export const app = {
     getPath: jest.fn()
-}
+};
+export const dialog = {
+    showSaveDialog: jest.fn()
+};

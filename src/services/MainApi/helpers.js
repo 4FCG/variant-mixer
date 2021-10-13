@@ -81,7 +81,7 @@ module.exports.generateComposite = async function generateComposite(base, layers
   let height = metadata.height;
 
   // create watermark
-  let watermark = sharp(join(join(__dirname, '../'), './watermark.png'));
+  let watermark = sharp(join(__dirname, '..', '..', 'assets', 'watermark.png'));
   if (width > height) {
     watermark.resize({height: Math.floor(height * 0.2)});
   } else {
