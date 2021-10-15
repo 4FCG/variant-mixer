@@ -21,7 +21,6 @@ module.exports = {
                     properties: ['openDirectory']
                 });
             } catch (err) {
-                console.error(err);
                 return {canceled: true, error: {type: 'error', message: 'Something went wrong during selection.'}};
             }
           
@@ -34,9 +33,8 @@ module.exports = {
           
             // Check if folder exists
             try {
-                access(folder);
+                await access(folder);
             } catch (err) {
-                console.error(err);
                 return {canceled: true, error: {type: 'error', message: 'The selected folder cannot be reached.'}};
             }
           
@@ -48,7 +46,6 @@ module.exports = {
                 }
                 await Promise.all(variants);
             } catch (err) {
-                console.error(err);
                 return {canceled: true, error: {type: 'error', message: 'Something went wrong during image creation.'}};
             }
             return {canceled: false, error: null};

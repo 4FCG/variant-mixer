@@ -10,6 +10,7 @@ describe("deletePackage tests", () => {
     var createdImages = [];
       
     beforeEach(() => {
+        jest.clearAllMocks();
         createdImages = [];
     });
 

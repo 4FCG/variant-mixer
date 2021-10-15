@@ -9,6 +9,7 @@ describe("deletePackage tests", () => {
     var createdFolders = []
       
     beforeEach(() => {
+        jest.clearAllMocks();
         app.getPath.mockReturnValue(testFolder);
         createdFolders = [];
     });
@@ -73,9 +74,9 @@ describe("deletePackage tests", () => {
         // Ensure folder is copied properly
         await expect(fs.promises.access(dest)).resolves.toBe();
 
-        // make rmdir throw error
+        // make rmdir throw error -- CLEAR THIS --
         let mockRmdir = jest.spyOn(fs.promises, "rmdir")
-        mockRmdir.mockImplementation(async () => {
+        mockRmdir.mockImplementationOnce(async () => {
             throw new Error();
         });
 
@@ -86,9 +87,6 @@ describe("deletePackage tests", () => {
 
         // Check if proper error message is returned
         await expect(callback(null, dest)).resolves.toStrictEqual({canceled: true, error: {type: 'error', message: 'Something went wrong while deleting the package'}});
-
-        // undo mock
-        mockRmdir.mockRestore();
     });
 });
 
