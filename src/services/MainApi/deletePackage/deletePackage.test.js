@@ -40,11 +40,13 @@ describe('deletePackage tests', () => {
         const src = path.join(testFolder, 'assets', 'testPackage');
         const dest = path.join(testFolder, 'Packages', 'testPackage');
         try {
+            // This may be causing random unit test failures
             await fs.copy(src, dest);
-            createdFolders.push(dest);
         } catch (err) {
             console.error(err);
         }
+
+        createdFolders.push(dest);
 
         // Ensure folder is copied properly
         await expect(fs.promises.access(dest)).resolves.toBe();
@@ -58,6 +60,9 @@ describe('deletePackage tests', () => {
         // Check if package folder is deleted and proper message is returned
         expect(result).toStrictEqual({ canceled: false, error: null });
         await expect(fs.promises.access(dest)).rejects.toThrow();
+
+        // Because the folder is already deleted, remove from cleanup
+        createdFolders = [];
     });
 
     test('Returns proper error when deletion fails', async () => {

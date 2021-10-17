@@ -1,6 +1,6 @@
 const { ipcMain, dialog, app } = require('electron');
 const { extname, basename, join } = require('path');
-const { rmdir } = require('fs/promises');
+const { rmdir, access } = require('fs/promises');
 const extract = require('extract-zip');
 const { getBaseImage } = require('../helpers');
 
@@ -22,7 +22,6 @@ module.exports = {
                     properties: ['openFile']
                 });
             } catch (err) {
-                console.error(err);
                 return { canceled: true, error: { type: 'error', message: 'Something went wrong during selection.' } };
             }
 
@@ -38,10 +37,11 @@ module.exports = {
             const folderName = basename(source, extname(source));
             const outputFolder = join(app.getPath('userData'), `/Packages/${folderName}`);
             try {
-                // Unzip, filter out empty folders called / to prevent crash
+                // Ensure source file exists
+                await access(source);
+                // Unzip, TODO: filter out empty folders called / to prevent crash
                 await extract(source, { dir: outputFolder });
             } catch (err) {
-                console.error(err);
                 return { canceled: true, error: { type: 'error', message: 'Something went wrong during file processing.' } };
             }
 
