@@ -38,7 +38,7 @@ const Positioner = styled.div`
 `;
 
 export class LoadingIcon extends React.Component {
-    render() {
+    render () {
         return (
             <Positioner>
                 <Icon></Icon>

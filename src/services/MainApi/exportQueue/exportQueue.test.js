@@ -1,14 +1,14 @@
-const exportQueue = require("./exportQueue");
-const { ipcMain, dialog } = require("electron");
-const fs = require('fs')
-const path = require("path");
+const exportQueue = require('./exportQueue');
+const { ipcMain, dialog } = require('electron');
+const fs = require('fs');
+const path = require('path');
 
 const testFolder = path.join(__dirname, '..', '..', 'test').toString();
 const testPackPath = path.join(testFolder, 'assets', 'testPackage');
 
-describe("exportQueue tests", () => {
-    var createdFolders = []
-      
+describe('exportQueue tests', () => {
+    let createdFolders = [];
+
     beforeEach(() => {
         jest.clearAllMocks();
         createdFolders = [];
@@ -45,7 +45,7 @@ describe("exportQueue tests", () => {
                 layers: [path.join(testPackPath, '1', 'Mustache.png')]
             }
         ];
-        
+
         // Set fake dialog output
         dialog.showOpenDialog.mockResolvedValue({
             filePaths: [mockDirPath],
@@ -55,11 +55,11 @@ describe("exportQueue tests", () => {
         // Apply handler jest function
         exportQueue.configure();
         // Grab and run callback function with fakeArgs
-        let callback = ipcMain.handle.mock.calls[0][1];
-        let result = await callback(null, fakeArgs);
+        const callback = ipcMain.handle.mock.calls[0][1];
+        const result = await callback(null, fakeArgs);
 
         // Check if the right output is given
-        expect(result).toStrictEqual({canceled: false, error: null});
+        expect(result).toStrictEqual({ canceled: false, error: null });
         // Check if both images are made
         await expect(fs.promises.access(path.join(mockDirPath, '0.jpeg'))).resolves.toBe();
         await expect(fs.promises.access(path.join(mockDirPath, '1.jpeg'))).resolves.toBe();
@@ -75,17 +75,17 @@ describe("exportQueue tests", () => {
         // Apply handler jest function
         exportQueue.configure();
         // Grab and run callback function with fakeArgs
-        let callback = ipcMain.handle.mock.calls[0][1];
-        let result = await callback(null, null);
+        const callback = ipcMain.handle.mock.calls[0][1];
+        const result = await callback(null, null);
 
         // Check if the right output is given
-        expect(result).toStrictEqual({canceled: true, error: null});
+        expect(result).toStrictEqual({ canceled: true, error: null });
     });
 
     test('Returns the right error when nonexistent folder is picked', async () => {
         // Path to dir the does not actually exist
         const mockDirPath = 'fakeFolder/fake';
-        
+
         // Set fake dialog output
         dialog.showOpenDialog.mockResolvedValue({
             filePaths: [mockDirPath],
@@ -95,17 +95,17 @@ describe("exportQueue tests", () => {
         // Apply handler jest function
         exportQueue.configure();
         // Grab and run callback function with fakeArgs
-        let callback = ipcMain.handle.mock.calls[0][1];
-        let result = await callback(null, null);
+        const callback = ipcMain.handle.mock.calls[0][1];
+        const result = await callback(null, null);
 
         // Check if the right output is given
-        expect(result).toStrictEqual({canceled: true, error: {type: 'error', message: 'The selected folder cannot be reached.'}});
+        expect(result).toStrictEqual({ canceled: true, error: { type: 'error', message: 'The selected folder cannot be reached.' } });
     });
 
     test('Returns the right error when export fails', async () => {
         // Path to test dir
         const mockDirPath = testFolder;
-        
+
         // Set fake dialog output
         dialog.showOpenDialog.mockResolvedValue({
             filePaths: [mockDirPath],
@@ -123,11 +123,11 @@ describe("exportQueue tests", () => {
         // Apply handler jest function
         exportQueue.configure();
         // Grab and run callback function with fakeArgs
-        let callback = ipcMain.handle.mock.calls[0][1];
-        let result = await callback(null, fakeArgs);
+        const callback = ipcMain.handle.mock.calls[0][1];
+        const result = await callback(null, fakeArgs);
 
         // Check if the right output is given
-        expect(result).toStrictEqual({canceled: true, error: {type: 'error', message: 'Something went wrong during image creation.'}});
+        expect(result).toStrictEqual({ canceled: true, error: { type: 'error', message: 'Something went wrong during image creation.' } });
     });
 
     test('Returns error when folder dialog fails', async () => {
@@ -137,10 +137,10 @@ describe("exportQueue tests", () => {
         // Apply handler jest function
         exportQueue.configure();
         // Grab and run callback function
-        let callback = ipcMain.handle.mock.calls[0][1];
-        let result = await callback(null, null);
+        const callback = ipcMain.handle.mock.calls[0][1];
+        const result = await callback(null, null);
 
         // Check if error response is given
-        expect(result).toStrictEqual({canceled: true, error: {type: 'error', message: 'Something went wrong during selection.'}});
+        expect(result).toStrictEqual({ canceled: true, error: { type: 'error', message: 'Something went wrong during selection.' } });
     });
 });

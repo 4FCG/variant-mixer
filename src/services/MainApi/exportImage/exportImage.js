@@ -3,7 +3,7 @@ const { generateComposite } = require('../helpers');
 
 module.exports = {
     configure: () => {
-        ipcMain.handle("exportImage", async (event, args) => {
+        ipcMain.handle('exportImage', async (event, args) => {
             let result = null;
             try {
                 // Get output path
@@ -12,35 +12,35 @@ module.exports = {
                     defaultPath: 'Variant',
                     buttonLabel: 'Export',
                     filters: [
-                    {
-                        name: "JPEG",
-                        extensions: ['jpeg', 'jpg']
-                    },
-                    {
-                        name: "PNG",
-                        extensions: ['png']
-                    },
-                    {
-                        name: "WebP",
-                        extensions: ['webp']
-                    }
+                        {
+                            name: 'JPEG',
+                            extensions: ['jpeg', 'jpg']
+                        },
+                        {
+                            name: 'PNG',
+                            extensions: ['png']
+                        },
+                        {
+                            name: 'WebP',
+                            extensions: ['webp']
+                        }
                     ]
                 });
-            } catch(err) {
-                return {canceled: true, error: {type: 'error', message: 'Something went wrong while selecting export location.'}, result: null};
+            } catch (err) {
+                return { canceled: true, error: { type: 'error', message: 'Something went wrong while selecting export location.' }, result: null };
             }
-          
+
             if (result.canceled) {
-                return {canceled: true, error: null};
+                return { canceled: true, error: null };
             }
-          
+
             try {
                 // Create image
                 await generateComposite(args.base, args.layers, result.filePath.split('.').slice(0, -1).join('.'), result.filePath.split('.').pop());
             } catch (err) {
-                return {canceled: true, error: {type: 'error', message: 'Something went wrong while generating image.'}, result: null};
+                return { canceled: true, error: { type: 'error', message: 'Something went wrong while generating image.' }, result: null };
             }
-            return {canceled: false, error: null, result: result.filePath.split('.').slice(0, -1).join('.')};
+            return { canceled: false, error: null, result: result.filePath.split('.').slice(0, -1).join('.') };
         });
     }
 };

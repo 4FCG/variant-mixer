@@ -1,14 +1,14 @@
-const exportImage = require("./exportImage");
-const { ipcMain, dialog } = require("electron");
-const fs = require('fs')
-const path = require("path");
+const exportImage = require('./exportImage');
+const { ipcMain, dialog } = require('electron');
+const fs = require('fs');
+const path = require('path');
 
 const testFolder = path.join(__dirname, '..', '..', 'test').toString();
 const testPackPath = path.join(testFolder, 'assets', 'testPackage');
 
-describe("deletePackage tests", () => {
-    var createdImages = [];
-      
+describe('deletePackage tests', () => {
+    let createdImages = [];
+
     beforeEach(() => {
         jest.clearAllMocks();
         createdImages = [];
@@ -32,7 +32,7 @@ describe("deletePackage tests", () => {
             base: path.join(testPackPath, 'Base.png'),
             layers: [path.join(testPackPath, '1', 'Glasses.png')]
         };
-        
+
         // Set fake dialog output
         dialog.showSaveDialog.mockResolvedValue({
             filePath: fakeImagePath,
@@ -42,11 +42,11 @@ describe("deletePackage tests", () => {
         // Apply handler jest function
         exportImage.configure();
         // Grab and run callback function with fakeArgs
-        let callback = ipcMain.handle.mock.calls[0][1];
-        let result = await callback(null, fakeArgs);
+        const callback = ipcMain.handle.mock.calls[0][1];
+        const result = await callback(null, fakeArgs);
 
         // Check if the right output is given
-        expect(result).toStrictEqual({canceled: false, error: null, result: fakeImagePath.split('.').slice(0, -1).join('.')});
+        expect(result).toStrictEqual({ canceled: false, error: null, result: fakeImagePath.split('.').slice(0, -1).join('.') });
         // Check if file is made
         await expect(fs.promises.access(fakeImagePath)).resolves.toBe();
     });
@@ -61,11 +61,11 @@ describe("deletePackage tests", () => {
         // Apply handler jest function
         exportImage.configure();
         // Grab and run callback function
-        let callback = ipcMain.handle.mock.calls[0][1];
-        let result = await callback(null, null);
+        const callback = ipcMain.handle.mock.calls[0][1];
+        const result = await callback(null, null);
 
         // Check if cancel response is given
-        expect(result).toStrictEqual({canceled: true, error: null});
+        expect(result).toStrictEqual({ canceled: true, error: null });
     });
 
     test('Returns error when composite generation fails', async () => {
@@ -83,11 +83,11 @@ describe("deletePackage tests", () => {
         // Apply handler jest function
         exportImage.configure();
         // Grab and run callback function with improper args
-        let callback = ipcMain.handle.mock.calls[0][1];
-        let result = await callback(null, fakeArgs);
+        const callback = ipcMain.handle.mock.calls[0][1];
+        const result = await callback(null, fakeArgs);
 
         // Check if error response is given
-        expect(result).toStrictEqual({canceled: true, error: {type: 'error', message: 'Something went wrong while generating image.'}, result: null});
+        expect(result).toStrictEqual({ canceled: true, error: { type: 'error', message: 'Something went wrong while generating image.' }, result: null });
     });
 
     test('Returns error when dialog fails', async () => {
@@ -97,10 +97,10 @@ describe("deletePackage tests", () => {
         // Apply handler jest function
         exportImage.configure();
         // Grab and run callback function
-        let callback = ipcMain.handle.mock.calls[0][1];
-        let result = await callback(null, null);
+        const callback = ipcMain.handle.mock.calls[0][1];
+        const result = await callback(null, null);
 
         // Check if error response is given
-        expect(result).toStrictEqual({canceled: true, error: {type: 'error', message: 'Something went wrong while selecting export location.'}, result: null});
+        expect(result).toStrictEqual({ canceled: true, error: { type: 'error', message: 'Something went wrong while selecting export location.' }, result: null });
     });
 });

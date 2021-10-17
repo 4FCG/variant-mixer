@@ -1,11 +1,11 @@
-import React from 'react'
+import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { ExportQueue } from './ExportQueue';
 import { mockApi, mockQueueState } from '../../services/MainApi.mock';
-import { createBrowserHistory } from "history";
+import { createBrowserHistory } from 'history';
 import { Router } from 'react-router-dom';
 
-describe("ExportQueue", () => {
+describe('ExportQueue', () => {
     beforeEach(() => {
         jest.restoreAllMocks();
         jest.useFakeTimers();
@@ -14,7 +14,7 @@ describe("ExportQueue", () => {
         jest.useRealTimers();
     });
 
-    test('All images in queue are rendered', async () => {  
+    test('All images in queue are rendered', async () => {
         // Run to apply mockApi
         mockApi();
 
@@ -26,7 +26,7 @@ describe("ExportQueue", () => {
         });
     });
 
-    test('Redirects after image export is successful', async () => {  
+    test('Redirects after image export is successful', async () => {
         mockApi();
 
         // Mock Router history, Redirect component uses history.replace
@@ -40,24 +40,24 @@ describe("ExportQueue", () => {
         );
 
         // Click export button
-        let exportButton = screen.getByRole('button', {name: /Export/i});
+        const exportButton = screen.getByRole('button', { name: /Export/i });
         fireEvent.click(exportButton);
 
         // Check if redirects to /
         await waitFor(() => {
             expect(history.replace).toHaveBeenCalledWith(expect.objectContaining({
-                "pathname": "/"
+                pathname: '/'
             }));
         });
     });
 
-    test('Renders queue export error', async () => {  
-        mockApi({exportQueueError: true});
+    test('Renders queue export error', async () => {
+        mockApi({ exportQueueError: true });
 
         render(<ExportQueue variants={mockQueueState} clearQueue={jest.fn()} popQueue={jest.fn()} />);
 
         // Click export button
-        let exportButton = screen.getByRole('button', {name: /Export/i});
+        const exportButton = screen.getByRole('button', { name: /Export/i });
         fireEvent.click(exportButton);
 
         // Check if error renders
@@ -66,7 +66,7 @@ describe("ExportQueue", () => {
         });
     });
 
-    test('Redirects after clearing queue', async () => {  
+    test('Redirects after clearing queue', async () => {
         mockApi();
 
         // Mock Router history, Redirect component uses history.replace
@@ -83,19 +83,19 @@ describe("ExportQueue", () => {
         );
 
         // Click clear button
-        let clearButton = screen.getByRole('button', {name: /Clear queue/i});
+        const clearButton = screen.getByRole('button', { name: /Clear queue/i });
         fireEvent.click(clearButton);
 
         // Check if error renders
         await waitFor(() => {
             expect(clearQueue).toHaveBeenCalled();
             expect(history.replace).toHaveBeenCalledWith(expect.objectContaining({
-                "pathname": "/"
+                pathname: '/'
             }));
         });
     });
 
-    test('Right click on image opens contextmenu', async () => {  
+    test('Right click on image opens contextmenu', async () => {
         mockApi();
 
         render(<ExportQueue variants={mockQueueState} clearQueue={jest.fn()} popQueue={jest.fn()} />);
@@ -108,11 +108,11 @@ describe("ExportQueue", () => {
         fireEvent.contextMenu(screen.getAllByRole('img')[0]);
 
         await waitFor(() => {
-            expect(screen.getByRole('button', {name: /Remove from queue/i})).toBeInTheDocument();
+            expect(screen.getByRole('button', { name: /Remove from queue/i })).toBeInTheDocument();
         });
     });
 
-    test('Remove from queue calls popQueue', async () => {  
+    test('Remove from queue calls popQueue', async () => {
         mockApi();
 
         const popQueue = jest.fn();
@@ -125,15 +125,14 @@ describe("ExportQueue", () => {
 
         fireEvent.contextMenu(screen.getAllByRole('img')[0]);
 
-        const removeButton = await screen.findByRole('button', {name: /Remove from queue/i});
+        const removeButton = await screen.findByRole('button', { name: /Remove from queue/i });
         fireEvent.click(removeButton);
 
         // Check if popQueue was called with correct index
         await waitFor(() => {
-            expect(popQueue).toHaveBeenCalledWith("0");
+            expect(popQueue).toHaveBeenCalledWith('0');
             // Menu should close after click
-            expect(screen.queryByRole('button', {name: /Remove from queue/i})).not.toBeInTheDocument();
+            expect(screen.queryByRole('button', { name: /Remove from queue/i })).not.toBeInTheDocument();
         });
-        
     });
 });

@@ -1,16 +1,15 @@
 import React from 'react';
 import { PageWrapper, Button, LayerStack, ErrorBox, LoadingIcon, ContextMenu } from '../../components';
 import PropTypes from 'prop-types';
-import { Redirect } from "react-router-dom";
+import { Redirect } from 'react-router-dom';
 import { ImageContainer, QueueBox, ScrollBox, ButtonWrapper } from './ExportQueue.styles';
 
-
 class ExportQueue extends React.Component {
-    constructor(props) {
+    constructor (props) {
         super(props);
         this.state = {
-            'redirect': null,
-            'error': null,
+            redirect: null,
+            error: null,
             timer: null,
             isLoading: true,
             showMenu: null
@@ -23,10 +22,10 @@ class ExportQueue extends React.Component {
         this.handleRemove = this.handleRemove.bind(this);
     }
 
-    componentDidMount() {
+    componentDidMount () {
         if (this.props.variants.length === 0) {
             this.setState({
-                "redirect": true
+                redirect: true
             });
         }
         this.setState({
@@ -34,19 +33,19 @@ class ExportQueue extends React.Component {
         });
     }
 
-    async handleClick() {
+    async handleClick () {
         // Remove unneeded variables
-        let variants = this.props.variants.map(v => ({layers: v.layers.map(i => i.path), base: v.path}));
+        const variants = this.props.variants.map(v => ({ layers: v.layers.map(i => i.path), base: v.path }));
         try {
             // Run export on all images in queue
-            let result = await window.mainApi.exportQueue(variants);
+            const result = await window.mainApi.exportQueue(variants);
             if (result.canceled && result.error) {
                 this.setError(result.error.type, result.error.message);
             } else if (!result.canceled) {
                 // clear queue and redirect
                 this.props.clearQueue();
                 this.setState({
-                    "redirect": true
+                    redirect: true
                 });
             }
         } catch (err) {
@@ -54,33 +53,33 @@ class ExportQueue extends React.Component {
         }
     }
 
-    setError(type, message) {
+    setError (type, message) {
         this.setState({
-            "error": {type: type, message: message},
+            error: { type: type, message: message },
             timer: setTimeout(() => {
                 // After 5 remove error message
                 this.setState({
-                "error": null
+                    error: null
                 });
             }, 5000)
         });
     }
 
-    async clearButton() {
+    async clearButton () {
         // clear queue and redirect
         this.props.clearQueue();
         this.setState({
-            "redirect": true
+            redirect: true
         });
     }
 
-    handleContext(event) {
+    handleContext (event) {
         event.preventDefault();
 
         // Get position
         const pos = {
-            x: event.pageX + "px",
-            y: event.pageY + "px"
+            x: event.pageX + 'px',
+            y: event.pageY + 'px'
         };
 
         // Check if not clicked on a box
@@ -98,66 +97,66 @@ class ExportQueue extends React.Component {
         });
     }
 
-    handleHideMenu() {
+    handleHideMenu () {
         this.setState({
-          showMenu: null
+            showMenu: null
         });
     }
 
-    handleRemove(e) {
+    handleRemove (e) {
         this.handleHideMenu();
         this.props.popQueue(e.currentTarget.dataset.index);
 
         if (this.props.variants.length === 1) {
             this.setState({
-                "redirect": true
+                redirect: true
             });
         }
-      }
+    }
 
-    get contextMenu() {
+    get contextMenu () {
         // Generate context menu
         if (this.state.showMenu) {
             const RemoveButton = {
-                message: "Remove from queue",
+                message: 'Remove from queue',
                 handle: this.handleRemove,
                 index: this.state.showMenu.index
-            }
-            return <ContextMenu pos={this.state.showMenu.pos} hide={this.handleHideMenu} buttons={[RemoveButton]}/>
-        }
-        else {
+            };
+            return <ContextMenu pos={this.state.showMenu.pos} hide={this.handleHideMenu} buttons={[RemoveButton]}/>;
+        } else {
             return null;
         }
     }
 
-    render() {
+    render () {
         if (this.state.redirect) {
-            return <Redirect to='/' />
+            return <Redirect to='/' />;
         }
         return (
             // Display loading icon until page is set to loaded
-            this.state.isLoading ? <LoadingIcon /> :
-            <PageWrapper>
-                {this.contextMenu}
-                {this.state.error &&
+            this.state.isLoading
+                ? <LoadingIcon />
+                : <PageWrapper>
+                    {this.contextMenu}
+                    {this.state.error &&
                     <ErrorBox type={this.state.error.type}>
                         {this.state.error.message}
-                    </ErrorBox> 
-                }
-                <ScrollBox>
-                    <QueueBox>
-                        {this.props.variants.map((variant, index) => 
-                            <ImageContainer key={index} onContextMenu={this.handleContext} data-index={index}>
-                                <LayerStack layers={variant.layers} baseImg={variant.baseImg} />
-                            </ImageContainer>
-                        )}
-                    </QueueBox>
-                </ScrollBox>
-                <ButtonWrapper>
-                    <Button onClick={this.handleClick}>Export</Button>
-                    <Button onClick={this.clearButton}>Clear queue</Button>
-                </ButtonWrapper>
-            </PageWrapper>
+                    </ErrorBox>
+                    }
+                    <ScrollBox>
+                        <QueueBox>
+                            {this.props.variants.map((variant, index) =>
+                                <ImageContainer key={index} onContextMenu={this.handleContext} data-index={index}>
+                                    <LayerStack layers={variant.layers} baseImg={variant.baseImg} />
+                                </ImageContainer>
+                            )}
+                        </QueueBox>
+                    </ScrollBox>
+                    <ButtonWrapper>
+                        <Button onClick={this.handleClick}>Export</Button>
+                        <Button onClick={this.clearButton}>Clear queue</Button>
+                    </ButtonWrapper>
+                </PageWrapper>
         );
     }
 }
