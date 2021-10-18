@@ -14,6 +14,13 @@ module.exports = {
                 return { canceled: true, error: { type: 'error', message: 'The path did not point to a package folder' } };
             }
             try {
+                fs.promises.access(args);
+            } catch (err) {
+                return { canceled: true, error: { type: 'error', message: 'The path did not point to a package folder' } };
+            }
+
+            // remove package
+            try {
                 await fs.promises.rmdir(args, { recursive: true });
             } catch (err) {
                 return { canceled: true, error: { type: 'error', message: 'Something went wrong while deleting the package' } };

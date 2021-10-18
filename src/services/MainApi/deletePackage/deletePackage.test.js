@@ -60,9 +60,6 @@ describe('deletePackage tests', () => {
         // Check if package folder is deleted and proper message is returned
         expect(result).toStrictEqual({ canceled: false, error: null });
         await expect(fs.promises.access(dest)).rejects.toThrow();
-
-        // Because the folder is already deleted, remove from cleanup
-        createdFolders = [];
     });
 
     test('Returns proper error when deletion fails', async () => {

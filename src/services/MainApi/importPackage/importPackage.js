@@ -1,6 +1,6 @@
 const { ipcMain, dialog, app } = require('electron');
-const { extname, basename, join } = require('path');
-const { rmdir, access } = require('fs/promises');
+const { extname, basename, join, resolve } = require('path');
+const { rmdir, access, readdir } = require('fs/promises');
 const extract = require('extract-zip');
 const { getBaseImage } = require('../helpers');
 
@@ -47,6 +47,7 @@ module.exports = {
 
             // check if Base image exists
             try {
+                await checkPackageIntegrity(outputFolder);
                 await getBaseImage(outputFolder);
             } catch {
                 // remove bad package from folder
@@ -62,3 +63,20 @@ module.exports = {
         });
     }
 };
+
+const allowedExtensions = ['.png', '.jpeg', '.jpg', '.webp'];
+
+// Ensure that no non image files are present in the package folder.
+async function checkPackageIntegrity (packagePath) {
+    const content = await readdir(packagePath, { withFileTypes: true });
+    for (const file of content) {
+        if (file.isDirectory()) {
+            await checkPackageIntegrity(resolve(packagePath, file.name));
+        } else if (file.isFile()) {
+            const fileExtension = extname(file.name);
+            if (!allowedExtensions.includes(fileExtension)) {
+                throw new Error(`${fileExtension} is not allowed to be in a package folder.`);
+            }
+        }
+    }
+}
