@@ -2,6 +2,7 @@ const importPackage = require('./importPackage');
 const { ipcMain, dialog, app } = require('electron');
 const fs = require('fs');
 const path = require('path');
+const { fileExists } = require('../helpers');
 
 const testFolder = path.join(__dirname, '..', '..', 'test').toString();
 const testImportPath = path.join(testFolder, 'assets', 'testImportPackage.zip');
@@ -96,7 +97,8 @@ describe('exportQueue tests', () => {
         expect(result).toStrictEqual({ canceled: true, error: { type: 'warning', message: 'The package is not in the correct format.' } });
 
         // When the package is bad, autoDelete should remove it afterwards
-        await expect(fs.promises.access(unzippedPackage)).rejects.toThrow();
+        const exists = await fileExists(unzippedPackage);
+        expect(exists).toBe(false);
     });
 
     test('Can import a proper package', async () => {
@@ -119,7 +121,8 @@ describe('exportQueue tests', () => {
         expect(result).toStrictEqual({ canceled: false, error: null });
 
         // Check if the unzipped package exists
-        await expect(fs.promises.access(unzippedPackage)).resolves.toBe();
+        const exists = await fileExists(unzippedPackage);
+        expect(exists).toBe(true);
     });
 
     test('Returns error when dialog fails', async () => {

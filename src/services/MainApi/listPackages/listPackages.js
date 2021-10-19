@@ -24,14 +24,12 @@ module.exports = {
                                 img: '"image://' + imagePath.split(path.sep).join(path.posix.sep) + '"'
                             });
                         } catch {
-                            console.error(`Base image not found in ${packagePath}`);
                             // Enable package could not load warning
                             warning = true;
                         }
                     }
                 }
             } catch (err) {
-                console.error(err);
                 return { canceled: true, error: { type: 'error', message: 'Something went wrong while loading packages.' }, result: [] };
             }
             return { canceled: false, error: warning ? { type: 'warning', message: 'One or more packages could not be loaded.' } : null, result: packages };

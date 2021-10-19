@@ -2,6 +2,7 @@ const deletePackage = require('./deletePackage');
 const { ipcMain, app } = require('electron');
 const fs = require('fs-extra');
 const path = require('path');
+const { fileExists } = require('../helpers');
 
 const testFolder = path.join(__dirname, '..', '..', 'test').toString();
 
@@ -40,16 +41,12 @@ describe('deletePackage tests', () => {
         const src = path.join(testFolder, 'assets', 'testPackage');
         const dest = path.join(testFolder, 'Packages', 'testPackage');
         try {
-            // This may be causing random unit test failures
             await fs.copy(src, dest);
         } catch (err) {
             console.error(err);
         }
 
         createdFolders.push(dest);
-
-        // Ensure folder is copied properly
-        await expect(fs.promises.access(dest)).resolves.toBe();
 
         // Apply handler jest function
         deletePackage.configure();
@@ -59,7 +56,8 @@ describe('deletePackage tests', () => {
 
         // Check if package folder is deleted and proper message is returned
         expect(result).toStrictEqual({ canceled: false, error: null });
-        await expect(fs.promises.access(dest)).rejects.toThrow();
+        const exists = await fileExists(dest);
+        expect(exists).toBe(false);
     });
 
     test('Returns proper error when deletion fails', async () => {
@@ -73,9 +71,6 @@ describe('deletePackage tests', () => {
             console.error(err);
         }
 
-        // Ensure folder is copied properly
-        await expect(fs.promises.access(dest)).resolves.toBe();
-
         // make rmdir throw error -- CLEAR THIS --
         const mockRmdir = jest.spyOn(fs.promises, 'rmdir');
         mockRmdir.mockImplementationOnce(async () => {
@@ -86,8 +81,9 @@ describe('deletePackage tests', () => {
         deletePackage.configure();
         // Grab callback function with testPackage
         const callback = ipcMain.handle.mock.calls[0][1];
+        const result = await callback(null, dest);
 
         // Check if proper error message is returned
-        await expect(callback(null, dest)).resolves.toStrictEqual({ canceled: true, error: { type: 'error', message: 'Something went wrong while deleting the package' } });
+        expect(result).toStrictEqual({ canceled: true, error: { type: 'error', message: 'Something went wrong while deleting the package' } });
     });
 });

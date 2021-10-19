@@ -2,6 +2,7 @@ const exportImage = require('./exportImage');
 const { ipcMain, dialog } = require('electron');
 const fs = require('fs');
 const path = require('path');
+const { fileExists } = require('../helpers');
 
 const testFolder = path.join(__dirname, '..', '..', 'test').toString();
 const testPackPath = path.join(testFolder, 'assets', 'testPackage');
@@ -48,7 +49,8 @@ describe('deletePackage tests', () => {
         // Check if the right output is given
         expect(result).toStrictEqual({ canceled: false, error: null, result: fakeImagePath.split('.').slice(0, -1).join('.') });
         // Check if file is made
-        await expect(fs.promises.access(fakeImagePath)).resolves.toBe();
+        const exists = await fileExists(fakeImagePath);
+        expect(exists).toBe(true);
     });
 
     test('Cancels export when save dialog is canceled', async () => {

@@ -1,6 +1,7 @@
 const { join, extname, basename, sep, posix, dirname } = require('path');
 const { readdir, lstat, access } = require('fs/promises');
 const sharp = require('sharp');
+const fs = require('fs');
 
 const allowedExtensions = ['.png', '.jpg', '.jpeg', '.webp'];
 
@@ -109,4 +110,13 @@ module.exports.generateComposite = async function generateComposite (base, layer
     await composite.toFile(`${savePath}.${filetype}`);
     // Run composite code
     // return await composite;
+};
+
+// Return boolean if file or directory exists
+module.exports.fileExists = async function fileExists (file) {
+    return new Promise((resolve) => {
+        fs.access(file, fs.constants.F_OK, (err) => {
+            err ? resolve(false) : resolve(true);
+        });
+    });
 };

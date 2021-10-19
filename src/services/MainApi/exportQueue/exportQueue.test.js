@@ -2,6 +2,7 @@ const exportQueue = require('./exportQueue');
 const { ipcMain, dialog } = require('electron');
 const fs = require('fs');
 const path = require('path');
+const { fileExists } = require('../helpers');
 
 const testFolder = path.join(__dirname, '..', '..', 'test').toString();
 const testPackPath = path.join(testFolder, 'assets', 'testPackage');
@@ -61,8 +62,10 @@ describe('exportQueue tests', () => {
         // Check if the right output is given
         expect(result).toStrictEqual({ canceled: false, error: null });
         // Check if both images are made
-        await expect(fs.promises.access(path.join(mockDirPath, '0.jpeg'))).resolves.toBe();
-        await expect(fs.promises.access(path.join(mockDirPath, '1.jpeg'))).resolves.toBe();
+        const image1 = await fileExists(path.join(mockDirPath, '0.jpeg'));
+        const image2 = await fileExists(path.join(mockDirPath, '1.jpeg'));
+        expect(image1).toBe(true);
+        expect(image2).toBe(true);
     });
 
     test('Cancels export when folder selection is canceled', async () => {
