@@ -2,7 +2,7 @@ const listPackages = require('./listPackages');
 const { ipcMain, app } = require('electron');
 const path = require('path');
 
-const testFolder = path.join(__dirname, '..', '..', '..', '..', 'test').toString();
+const testFolder = path.join(__dirname, '..', '..', '..', 'test').toString();
 const testGoodPackage = path.join(testFolder, 'assets', 'goodListTest');
 const testBadPackage = path.join(testFolder, 'assets', 'badListTest');
 

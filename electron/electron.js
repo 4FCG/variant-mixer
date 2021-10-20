@@ -26,7 +26,7 @@ function createWindow (splash) {
         height: 720,
         minWidth: 600,
         minHeight: 450,
-        icon: path.join(__dirname, '../assets/icon.ico'),
+        icon: path.join(__dirname, '../public/icon.ico'),
         show: false,
         backgroundColor: '#0B0C10',
         autoHideMenuBar: true,
@@ -74,7 +74,7 @@ app.whenReady().then(() => {
     splash.loadURL(
         isDev
             ? format({
-                pathname: path.join(__dirname, '../../public/splash.html'),
+                pathname: path.join(__dirname, '../public/splash.html'),
                 protocol: 'file',
                 slashes: true
             })

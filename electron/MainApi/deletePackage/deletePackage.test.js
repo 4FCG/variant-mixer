@@ -4,7 +4,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const { fileExists } = require('../helpers');
 
-const testFolder = path.join(__dirname, '..', '..', '..', '..', 'test').toString();
+const testFolder = path.join(__dirname, '..', '..', '..', 'test').toString();
 
 describe('deletePackage tests', () => {
     let createdFolders = [];

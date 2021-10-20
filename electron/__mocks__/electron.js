@@ -1,10 +1,10 @@
-export const ipcMain = {
+module.exports.ipcMain = {
     handle: jest.fn()
 };
-export const app = {
+module.exports.app = {
     getPath: jest.fn()
 };
-export const dialog = {
+module.exports.dialog = {
     showSaveDialog: jest.fn(),
     showOpenDialog: jest.fn()
 };
