@@ -1,5 +1,5 @@
 const { join, extname, basename, sep, posix, dirname } = require('path');
-const { readdir, lstat, access } = require('fs/promises');
+const { readdir, lstat } = require('fs/promises');
 const sharp = require('sharp');
 const fs = require('fs');
 
@@ -39,9 +39,7 @@ module.exports.loadImages = async function loadImages (layerPath) {
                 if (!name.endsWith('_thumbnail')) {
                     const thumbnail = join(dirname(imagePath), `${name}_thumbnail.png`);
                     // check if the thumbnail exists
-                    try {
-                        await access(thumbnail);
-                    } catch {
+                    if (!(await fileExists(thumbnail))) {
                         // create missing thumbnail
                         await createThumbnail(imagePath);
                     }
@@ -113,10 +111,12 @@ module.exports.generateComposite = async function generateComposite (base, layer
 };
 
 // Return boolean if file or directory exists
-module.exports.fileExists = async function fileExists (file) {
+async function fileExists (file) {
     return new Promise((resolve) => {
         fs.access(file, fs.constants.F_OK, (err) => {
             err ? resolve(false) : resolve(true);
         });
     });
-};
+}
+
+module.exports.fileExists = fileExists;

@@ -8,7 +8,7 @@ const testFolder = path.join(__dirname, '..', '..', 'test').toString();
 const testImportPath = path.join(testFolder, 'assets', 'testImportPackage.zip');
 const testBadImportPath = path.join(testFolder, 'assets', 'testBadPackage.zip');
 
-describe('exportQueue tests', () => {
+describe('importPackage tests', () => {
     let createdFolders = [];
 
     beforeEach(() => {

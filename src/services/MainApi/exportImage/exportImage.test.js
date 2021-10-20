@@ -7,7 +7,7 @@ const { fileExists } = require('../helpers');
 const testFolder = path.join(__dirname, '..', '..', 'test').toString();
 const testPackPath = path.join(testFolder, 'assets', 'testPackage');
 
-describe('deletePackage tests', () => {
+describe('exportImage tests', () => {
     let createdImages = [];
 
     beforeEach(() => {

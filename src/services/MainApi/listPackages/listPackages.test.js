@@ -11,7 +11,7 @@ const goodTestResult = [{
     img: `"image://${path.join(testGoodPackage, 'Packages', 'goodPackage', 'Base.png').split(path.sep).join(path.posix.sep)}"`
 }];
 
-describe('exportQueue tests', () => {
+describe('listPackages tests', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
