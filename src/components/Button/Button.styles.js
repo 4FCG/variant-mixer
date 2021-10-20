@@ -22,4 +22,4 @@ export const ButtonStyles = css`
     &:hover {
         border-color: ${props => props.theme.primary};
     }
-`
+`;

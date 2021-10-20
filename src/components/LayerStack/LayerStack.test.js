@@ -1,17 +1,17 @@
-import React from 'react'
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { LayerStack } from './LayerStack';
 import logo from '../../assets/logo.png';
 
-function mockLayers(count) {
+function mockLayers (count) {
     return {
         path: logo,
         baseImg: logo,
-        layers: Array(count).fill({path: logo, overlayPath: logo})
+        layers: Array(count).fill({ path: logo, overlayPath: logo })
     };
 }
 
-describe("LayerStack", () => {
+describe('LayerStack', () => {
     test('Renders all layers', () => {
         const layers = mockLayers(5);
         render(<LayerStack layers={layers.layers} baseImg={layers.baseImg} />);
@@ -27,7 +27,6 @@ describe("LayerStack", () => {
     test('Renders correct layer images', () => {
         const layers = mockLayers(1);
         render(<LayerStack layers={layers.layers} baseImg={layers.baseImg} />);
-        expect(screen.getByTestId("layer")).toHaveStyle(`background-image: url(${layers.layers[0].overlayPath})`);
+        expect(screen.getByTestId('layer')).toHaveStyle(`background-image: url(${layers.layers[0].overlayPath})`);
     });
 });
-
