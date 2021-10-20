@@ -5,6 +5,12 @@ const fs = require('fs');
 
 const allowedExtensions = ['.png', '.jpg', '.jpeg', '.webp'];
 
+// Get buffer data for the watermark
+let watermarkImage;
+(async function () {
+    watermarkImage = await fs.promises.readFile(join(__dirname, '..', 'watermark.png'));
+})();
+
 // Find and return the path of the Base. image file
 module.exports.getBaseImage = async function getBaseImage (directory) {
     try {
@@ -80,7 +86,7 @@ module.exports.generateComposite = async function generateComposite (base, layer
     const height = metadata.height;
 
     // create watermark
-    let watermark = sharp(join(__dirname, '..', '..', 'public', 'watermark.png'));
+    let watermark = sharp(watermarkImage);
     if (width > height) {
         watermark.resize({ height: Math.floor(height * 0.2) });
     } else {
