@@ -6,7 +6,7 @@ const { fileExists } = require('../helpers');
 const fs = require('fs');
 
 // Set folder paths
-const testFolder = path.join(__dirname, '..', '..', 'test').toString();
+const testFolder = path.join(__dirname, '..', '..', '..', '..', 'test').toString();
 const testPackage = path.join(testFolder, 'assets', 'testPackage');
 const testEmptyPackage = path.join(testFolder, 'assets', 'testImportPackage.zip');
 const testEmptyPackageDest = path.join(testFolder, 'testLoadFolder');
