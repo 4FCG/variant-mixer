@@ -3,28 +3,28 @@ import PropTypes from 'prop-types';
 import { MenuButton, Menu } from './ContextMenu.styles';
 
 class ContextMenu extends React.Component {
-    constructor(props) {
+    constructor (props) {
         super(props);
         this.wrapperRef = React.createRef();
         this.handleClickOutside = this.handleClickOutside.bind(this);
     }
 
-    componentDidMount() {
+    componentDidMount () {
         document.addEventListener('mousedown', this.handleClickOutside);
     }
-    
-    componentWillUnmount() {
+
+    componentWillUnmount () {
         document.removeEventListener('mousedown', this.handleClickOutside);
     }
 
-    handleClickOutside(event) {
+    handleClickOutside (event) {
         // Check if a click happened outside of the menu
         if (this.wrapperRef && !this.wrapperRef.current.contains(event.target)) {
             this.props.hide();
         }
     }
 
-    render() {
+    render () {
         return (
             <Menu pos={this.props.pos} ref={this.wrapperRef}>
                 {this.props.buttons.map((button, index) =>

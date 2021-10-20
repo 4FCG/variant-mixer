@@ -2,53 +2,53 @@ import React from 'react';
 import { PageWrapper, Button, BoxWrapper, LayerStack, ErrorBox, LoadingIcon } from '../../components';
 import { Horizontal, ImageContainer, ButtonGroup, SelectionContainer } from './VariantSelection.styles';
 import PropTypes from 'prop-types';
-import { Redirect } from "react-router-dom";
+import { Redirect } from 'react-router-dom';
 
 class VariantSelection extends React.Component {
-    constructor(props) {
+    constructor (props) {
         super(props);
         this.state = {
-          package: null,
-          boxes: [],
-          redirect: false,
-          'error': null,
-          timer: null,
-          isLoading: true
+            package: null,
+            boxes: [],
+            redirect: false,
+            error: null,
+            timer: null,
+            isLoading: true
         };
         this.handleClick = this.handleClick.bind(this);
         this.handleExport = this.handleExport.bind(this);
         this.addToQueue = this.addToQueue.bind(this);
-      }
+    }
 
-    componentDidMount() {
+    componentDidMount () {
         if (!this.props.location.state) {
             this.setState({
                 redirect: true
             });
             return;
         }
-        let packagePath = this.props.location.state.packagePath;
+        const packagePath = this.props.location.state.packagePath;
         try {
             this.loadPackage(packagePath);
-        } catch(err) {
+        } catch (err) {
             console.error(err);
         }
     }
 
-    componentWillUnmount() {
+    componentWillUnmount () {
         // Cancel the error closing timer when unmounting
         clearTimeout(this.state.timer);
     }
 
-    async loadPackage(packagePath) {
-        let result = await window.mainApi.loadPackage(packagePath);
+    async loadPackage (packagePath) {
+        const result = await window.mainApi.loadPackage(packagePath);
         if (result.error) {
             this.setError(result.error.type, result.error.message);
         }
         if (!result.canceled) {
-            let boxes = [];
-            for (let [layerNum, layer] of result.result.layers.entries()) {
-                for (let [index, image] of layer.entries()) {
+            const boxes = [];
+            for (const [layerNum, layer] of result.result.layers.entries()) {
+                for (const [index, image] of layer.entries()) {
                     image.active = false;
                     boxes.push({
                         img: image.previewPath,
@@ -69,40 +69,40 @@ class VariantSelection extends React.Component {
         });
     }
 
-    setError(type, message) {
+    setError (type, message) {
         this.setState({
-            "error": {type: type, message: message},
+            error: { type: type, message: message },
             timer: setTimeout(() => {
                 // After 5 remove error message
                 this.setState({
-                "error": null
+                    error: null
                 });
             }, 5000)
         });
     }
 
-    handleClick(e) {
-        let box = this.state.boxes[e.currentTarget.dataset.index];
+    handleClick (e) {
+        const box = this.state.boxes[e.currentTarget.dataset.index];
         box.active = !box.active;
-        let newPackage = this.state.package;
+        const newPackage = this.state.package;
         newPackage.layers[box.layer][box.index].active = !newPackage.layers[box.layer][box.index].active;
         this.setState({
             package: newPackage
         });
     }
 
-    getActiveLayers() {
-        return [].concat(...this.state.package.layers).reduce(function(filtered, layer) {
+    getActiveLayers () {
+        return [].concat(...this.state.package.layers).reduce(function (filtered, layer) {
             if (layer.active) {
-                filtered.push({path: layer.path, overlayPath: layer.overlayPath});
+                filtered.push({ path: layer.path, overlayPath: layer.overlayPath });
             }
             return filtered;
         }, []);
     }
 
-    async handleExport() {
-        let layers = this.getActiveLayers().map(layer => layer.path);
-        let result = await window.mainApi.exportImage({base: this.state.package.path, layers: layers});
+    async handleExport () {
+        const layers = this.getActiveLayers().map(layer => layer.path);
+        const result = await window.mainApi.exportImage({ base: this.state.package.path, layers: layers });
         if (result.canceled && result.error) {
             this.setError(result.error.type, result.error.message);
         }
@@ -111,52 +111,53 @@ class VariantSelection extends React.Component {
         }
     }
 
-    addToQueue() {
-        this.props.queueHandle({layers: this.getActiveLayers(), path: this.state.package.path, baseImg: this.state.package.img});
+    addToQueue () {
+        this.props.queueHandle({ layers: this.getActiveLayers(), path: this.state.package.path, baseImg: this.state.package.img });
     }
 
-    get layers() {
+    get layers () {
         if (this.state.package) {
             return this.getActiveLayers();
         }
-        return []
+        return [];
     }
 
-    get baseImage() {
+    get baseImage () {
         if (this.state.package) {
-            return this.state.package.img
+            return this.state.package.img;
         }
-        return null
+        return null;
     }
 
-    render() {
+    render () {
         if (this.state.redirect) {
             return <Redirect to='/' />;
         }
         return (
             // Display loading icon until page is set to loaded
-            this.state.isLoading ? <LoadingIcon /> :
-            <PageWrapper>
-                {this.state.error &&
+            this.state.isLoading
+                ? <LoadingIcon />
+                : <PageWrapper>
+                    {this.state.error &&
                     <ErrorBox type={this.state.error.type}>
                         {this.state.error.message}
-                    </ErrorBox> 
-                }
-                <Horizontal>
-                    <ImageContainer>
-                        <LayerStack layers={this.layers} baseImg={this.baseImage} />
-                        <ButtonGroup>
-                            <Button primary onClick={this.handleExport}>Export Image</Button>
-                            <Button primary onClick={this.addToQueue}>Add to queue</Button>
-                        </ButtonGroup>
-                    </ImageContainer>
-                    <SelectionContainer>
-                        <BoxWrapper boxes={this.state.boxes} clickHandle={this.handleClick} />
-                    </SelectionContainer>
-                </Horizontal>
-            </PageWrapper>
+                    </ErrorBox>
+                    }
+                    <Horizontal>
+                        <ImageContainer>
+                            <LayerStack layers={this.layers} baseImg={this.baseImage} />
+                            <ButtonGroup>
+                                <Button primary onClick={this.handleExport}>Export Image</Button>
+                                <Button primary onClick={this.addToQueue}>Add to queue</Button>
+                            </ButtonGroup>
+                        </ImageContainer>
+                        <SelectionContainer>
+                            <BoxWrapper boxes={this.state.boxes} clickHandle={this.handleClick} />
+                        </SelectionContainer>
+                    </Horizontal>
+                </PageWrapper>
         );
-      }
+    }
 }
 
 VariantSelection.propTypes = {
@@ -164,4 +165,4 @@ VariantSelection.propTypes = {
     queueHandle: PropTypes.func.isRequired
 };
 
-export { VariantSelection }
+export { VariantSelection };

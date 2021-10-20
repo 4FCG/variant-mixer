@@ -1,9 +1,9 @@
-import React from 'react'
+import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { mockApi } from './services/MainApi.mock';
 import App from './App';
 
-describe("App integration testing", () => {
+describe('App integration testing', () => {
     test('Export Queue adding and clearing', async () => {
         // Mock the mainApi
         mockApi();
@@ -24,7 +24,7 @@ describe("App integration testing", () => {
         });
 
         // Get selection boxes
-        const selectionBoxes = screen.getAllByRole('img', {name: /Sample Layer/i});
+        const selectionBoxes = screen.getAllByRole('img', { name: /Sample Layer/i });
 
         // Click the first selection box
         fireEvent.click(selectionBoxes[0]);
@@ -35,7 +35,7 @@ describe("App integration testing", () => {
         });
 
         // Click the add to queue button
-        fireEvent.click(screen.getByRole('button', {name: /Add to queue/i}));
+        fireEvent.click(screen.getByRole('button', { name: /Add to queue/i }));
 
         // Check if queue counter goes up by 1
         await waitFor(() => {
@@ -43,7 +43,7 @@ describe("App integration testing", () => {
         });
 
         // Click the Export Queue link
-        fireEvent.click(screen.getByRole('link', {name: /Export Queue/i}));
+        fireEvent.click(screen.getByRole('link', { name: /Export Queue/i }));
 
         // Check if image in queue is rendered
         await waitFor(() => {
@@ -51,7 +51,7 @@ describe("App integration testing", () => {
         });
 
         // Click export button
-        fireEvent.click(screen.getByRole('button', {name: /Export/i}));
+        fireEvent.click(screen.getByRole('button', { name: /Export/i }));
 
         // Check if queue counter goes back down to 0
         await waitFor(() => {
@@ -79,7 +79,7 @@ describe("App integration testing", () => {
         });
 
         // Get selection boxes
-        const selectionBoxes = screen.getAllByRole('img', {name: /Sample Layer/i});
+        const selectionBoxes = screen.getAllByRole('img', { name: /Sample Layer/i });
 
         // Click the first selection box
         fireEvent.click(selectionBoxes[0]);
@@ -89,7 +89,7 @@ describe("App integration testing", () => {
             expect(screen.queryAllByTestId('layer').length).toBe(1);
         });
 
-        const queueAddButton = screen.getByRole('button', {name: /Add to queue/i});
+        const queueAddButton = screen.getByRole('button', { name: /Add to queue/i });
         // Click the add to queue button twice
         fireEvent.click(queueAddButton);
         fireEvent.click(queueAddButton);
@@ -100,7 +100,7 @@ describe("App integration testing", () => {
         });
 
         // Click the Export Queue link
-        fireEvent.click(screen.getByRole('link', {name: /Export Queue/i}));
+        fireEvent.click(screen.getByRole('link', { name: /Export Queue/i }));
 
         // Check if image in queue is rendered
         await waitFor(() => {
@@ -109,7 +109,7 @@ describe("App integration testing", () => {
 
         // Remove first image
         fireEvent.contextMenu(screen.getAllByRole('img')[0]);
-        const removeButton = await screen.findByRole('button', {name: /Remove from queue/i});
+        const removeButton = await screen.findByRole('button', { name: /Remove from queue/i });
         fireEvent.click(removeButton);
 
         // Check if queue counter goes back down to 1
@@ -117,6 +117,90 @@ describe("App integration testing", () => {
         await waitFor(() => {
             expect(screen.getByText(/^1$/i)).toBeInTheDocument();
             expect(screen.getAllByRole('img').length).toBe(1);
+        });
+    });
+
+    test('Renders update available notification', async () => {
+        // Mock the mainApi
+        mockApi();
+
+        // Implement mock event to only trigger updateAvailable
+        window.mainApi.onEvent.mockImplementation((type, callback) => {
+            if (type === 'updateAvailable') {
+                callback();
+            }
+        });
+
+        render(<App />);
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: /Close/i })).toBeInTheDocument();
+            expect(screen.queryByRole('button', { name: /Restart/i })).not.toBeInTheDocument();
+        });
+    });
+
+    test('Renders update downloaded notification', async () => {
+        // Mock the mainApi
+        mockApi();
+
+        // Implement mock event to only trigger updateDownloaded
+        window.mainApi.onEvent.mockImplementation((type, callback) => {
+            if (type === 'updateDownloaded') {
+                callback();
+            }
+        });
+
+        render(<App />);
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: /Close/i })).toBeInTheDocument();
+            expect(screen.getByRole('button', { name: /Restart/i })).toBeInTheDocument();
+        });
+    });
+
+    test('Pressing close closes the notification', async () => {
+        // Mock the mainApi
+        mockApi();
+
+        // Implement mock event to only trigger updateAvailable
+        window.mainApi.onEvent.mockImplementation((type, callback) => {
+            if (type === 'updateAvailable') {
+                callback();
+            }
+        });
+
+        render(<App />);
+
+        const closeButton = await screen.findByRole('button', { name: /Close/i });
+        // Click the close button
+        fireEvent.click(closeButton);
+
+        await waitFor(() => {
+            expect(screen.queryByRole('button', { name: /Close/i })).not.toBeInTheDocument();
+        });
+    });
+
+    test('Pressing restart runs restart function', async () => {
+        // Mock the mainApi
+        mockApi();
+
+        // Implement mock event to only trigger updateAvailable
+        window.mainApi.onEvent.mockImplementation((type, callback) => {
+            if (type === 'updateDownloaded') {
+                callback();
+            }
+        });
+
+        window.mainApi.restartApp = jest.fn();
+
+        render(<App />);
+
+        const restartButton = await screen.findByRole('button', { name: /Restart/i });
+        // Click the restart button
+        fireEvent.click(restartButton);
+
+        await waitFor(() => {
+            expect(window.mainApi.restartApp).toHaveBeenCalled();
         });
     });
 });

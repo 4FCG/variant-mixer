@@ -1,9 +1,9 @@
-import React from 'react'
+import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { VariantSelection } from './VariantSelection';
 import { mockApi } from '../../services/MainApi.mock';
 
-describe("VariantSelection", () => {
+describe('VariantSelection', () => {
     beforeEach(() => {
         jest.restoreAllMocks();
         jest.useFakeTimers();
@@ -12,23 +12,23 @@ describe("VariantSelection", () => {
         jest.useRealTimers();
     });
 
-    test('All layer select boxes are rendered', async () => {  
+    test('All layer select boxes are rendered', async () => {
         // Run to apply mockApi
         mockApi();
         // Location state is given by the redirect that leads to the page
-        render(<VariantSelection location={{state: {packagePath: "fakePath"}}}  queueHandle={jest.fn()} />);
+        render(<VariantSelection location={{ state: { packagePath: 'fakePath' } }} queueHandle={jest.fn()} />);
 
         // Check if all selection boxes are rendered
         await waitFor(() => {
-            expect(screen.getAllByRole('img', {name: /Sample Layer/i})).toHaveLength(3);
+            expect(screen.getAllByRole('img', { name: /Sample Layer/i })).toHaveLength(3);
         });
     });
 
-    test('Show error when loading package fails', async () => {  
+    test('Show error when loading package fails', async () => {
         // mock api with load package error
-        mockApi({loadPackageError: true});
-        
-        render(<VariantSelection location={{state: {packagePath: "fakePath"}}}  queueHandle={jest.fn()} />);
+        mockApi({ loadPackageError: true });
+
+        render(<VariantSelection location={{ state: { packagePath: 'fakePath' } }} queueHandle={jest.fn()} />);
 
         // Check if error is rendered and then removed
         await waitFor(() => {
@@ -43,7 +43,7 @@ describe("VariantSelection", () => {
     test('Shows base image when loaded', async () => {
         mockApi();
 
-        render(<VariantSelection location={{state: {packagePath: "fakePath"}}}  queueHandle={jest.fn()} />);
+        render(<VariantSelection location={{ state: { packagePath: 'fakePath' } }} queueHandle={jest.fn()} />);
 
         // Check if base image is loaded
         await waitFor(() => {
@@ -57,7 +57,7 @@ describe("VariantSelection", () => {
     test('Does not render layers upon loading', async () => {
         mockApi();
 
-        render(<VariantSelection location={{state: {packagePath: "fakePath"}}}  queueHandle={jest.fn()} />);
+        render(<VariantSelection location={{ state: { packagePath: 'fakePath' } }} queueHandle={jest.fn()} />);
 
         await waitFor(() => {
             // No layers should be displayed yet
@@ -68,10 +68,10 @@ describe("VariantSelection", () => {
     test('Clicking a selection box displays a new layer', async () => {
         mockApi();
 
-        render(<VariantSelection location={{state: {packagePath: "fakePath"}}}  queueHandle={jest.fn()} />);
+        render(<VariantSelection location={{ state: { packagePath: 'fakePath' } }} queueHandle={jest.fn()} />);
 
         // Wait until boxes are loaded
-        const selectionBoxes = await screen.findAllByRole('img', {name: /Sample Layer/i});
+        const selectionBoxes = await screen.findAllByRole('img', { name: /Sample Layer/i });
 
         // Click the first image box
         fireEvent.click(selectionBoxes[0]);
@@ -85,10 +85,10 @@ describe("VariantSelection", () => {
     test('Activating a box displays active border', async () => {
         mockApi();
 
-        render(<VariantSelection location={{state: {packagePath: "fakePath"}}}  queueHandle={jest.fn()} />);
+        render(<VariantSelection location={{ state: { packagePath: 'fakePath' } }} queueHandle={jest.fn()} />);
 
         // Wait until boxes are loaded
-        const selectionBoxes = await screen.findAllByRole('img', {name: /Sample Layer/i});
+        const selectionBoxes = await screen.findAllByRole('img', { name: /Sample Layer/i });
 
         // Click the first image box
         fireEvent.click(selectionBoxes[0]);
@@ -103,7 +103,7 @@ describe("VariantSelection", () => {
         mockApi();
 
         const queueHandle = jest.fn();
-        render(<VariantSelection location={{state: {packagePath: "fakePath"}}}  queueHandle={queueHandle} />);
+        render(<VariantSelection location={{ state: { packagePath: 'fakePath' } }} queueHandle={queueHandle} />);
 
         // Wait until package is fully loaded
         await waitFor(() => {
@@ -111,7 +111,7 @@ describe("VariantSelection", () => {
         });
 
         // Get selection boxes
-        const selectionBoxes = screen.getAllByRole('img', {name: /Sample Layer/i});
+        const selectionBoxes = screen.getAllByRole('img', { name: /Sample Layer/i });
 
         // Click the first selection box
         fireEvent.click(selectionBoxes[0]);
@@ -122,7 +122,7 @@ describe("VariantSelection", () => {
         });
 
         // Get add to queue button
-        const buttonElement = screen.getByRole('button', {name: /Add to queue/i});
+        const buttonElement = screen.getByRole('button', { name: /Add to queue/i });
 
         // Click the add to queue button
         fireEvent.click(buttonElement);
@@ -130,15 +130,15 @@ describe("VariantSelection", () => {
         // Check if queueHandle is used
         await waitFor(() => {
             expect(queueHandle).toHaveBeenCalledWith({
-                "baseImg": "logo.png",
+                baseImg: 'logo.png',
                 // Check if the activated layer is present
-                "layers": [
+                layers: [
                     {
-                        "overlayPath": "logo.png",
-                        "path": "logo.png"
+                        overlayPath: 'logo.png',
+                        path: 'logo.png'
                     }
                 ],
-                "path": "logo.png"
+                path: 'logo.png'
             });
         });
     });
@@ -146,9 +146,9 @@ describe("VariantSelection", () => {
     test('Export image button exports an image', async () => {
         mockApi();
 
-        let exportImage = jest.spyOn(window.mainApi, 'exportImage');
+        const exportImage = jest.spyOn(window.mainApi, 'exportImage');
 
-        render(<VariantSelection location={{state: {packagePath: "fakePath"}}}  queueHandle={jest.fn()} />);
+        render(<VariantSelection location={{ state: { packagePath: 'fakePath' } }} queueHandle={jest.fn()} />);
 
         // Wait until package is fully loaded
         await waitFor(() => {
@@ -156,7 +156,7 @@ describe("VariantSelection", () => {
         });
 
         // Get selection boxes
-        const selectionBoxes = screen.getAllByRole('img', {name: /Sample Layer/i});
+        const selectionBoxes = screen.getAllByRole('img', { name: /Sample Layer/i });
 
         // Click the first selection box
         fireEvent.click(selectionBoxes[0]);
@@ -167,7 +167,7 @@ describe("VariantSelection", () => {
         });
 
         // Get export button
-        const buttonElement = screen.getByRole('button', {name: /Export Image/i});
+        const buttonElement = screen.getByRole('button', { name: /Export Image/i });
 
         // Click the export button
         fireEvent.click(buttonElement);
@@ -175,10 +175,10 @@ describe("VariantSelection", () => {
         // Check if export api was called with the correct data
         await waitFor(() => {
             expect(exportImage).toHaveBeenCalledWith({
-                "base": "logo.png",
+                base: 'logo.png',
                 // check if enabled layer is present
-                "layers": [
-                    "logo.png",
+                layers: [
+                    'logo.png'
                 ]
             });
         });
@@ -187,7 +187,7 @@ describe("VariantSelection", () => {
     test('Export image renders confirmation message', async () => {
         mockApi();
 
-        render(<VariantSelection location={{state: {packagePath: "fakePath"}}}  queueHandle={jest.fn()} />);
+        render(<VariantSelection location={{ state: { packagePath: 'fakePath' } }} queueHandle={jest.fn()} />);
 
         // Wait until package is fully loaded
         await waitFor(() => {
@@ -195,7 +195,7 @@ describe("VariantSelection", () => {
         });
 
         // Get export button
-        const buttonElement = screen.getByRole('button', {name: /Export Image/i});
+        const buttonElement = screen.getByRole('button', { name: /Export Image/i });
 
         // Click the export button
         fireEvent.click(buttonElement);
@@ -207,9 +207,9 @@ describe("VariantSelection", () => {
     });
 
     test('Export image renders error message when export fails', async () => {
-        mockApi({exportImageError: true});
+        mockApi({ exportImageError: true });
 
-        render(<VariantSelection location={{state: {packagePath: "fakePath"}}}  queueHandle={jest.fn()} />);
+        render(<VariantSelection location={{ state: { packagePath: 'fakePath' } }} queueHandle={jest.fn()} />);
 
         // Wait until package is fully loaded
         await waitFor(() => {
@@ -217,7 +217,7 @@ describe("VariantSelection", () => {
         });
 
         // Get export button
-        const buttonElement = screen.getByRole('button', {name: /Export Image/i});
+        const buttonElement = screen.getByRole('button', { name: /Export Image/i });
 
         // Click the export button
         fireEvent.click(buttonElement);
