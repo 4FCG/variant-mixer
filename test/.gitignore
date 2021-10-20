@@ -5,3 +5,4 @@
 # And these folders
 !/Packages
 !/assets
+!/assets/**
